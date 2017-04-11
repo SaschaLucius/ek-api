@@ -10,23 +10,6 @@ import org.jsoup.select.Elements;
 
 public class Ad {
 
-    // leads to approx 1kb per entry -> 1 million entries per GB RAM
-    private String category;
-    private String description = "";
-    private String headline = "";
-    private String id;
-    private List<String> images;
-    private String location;
-    private String price;
-    private boolean printed = false;
-    private String subcategory;
-    private String time;
-    private String vendorId;
-    private String vendorNumber;
-
-    private Ad() {
-    }
-
     public static Ad byElement(String id, Element backupElement) {
         Ad element = new Ad();
         element.setId(id);
@@ -54,48 +37,117 @@ public class Ad {
             }
         }
 
-        String category = doc.getElementById("vap-brdcrmb").getElementsByClass("breadcrump-link").last().attr("href");
-        Element title = doc.getElementById("viewad-title");
-        if (title != null) {
-            element.setHeadline(title.ownText());
-        } else {
-            System.err.println("no title: " + id);
-        }
+        setCategory(element, doc);
+        setHeadline(element, doc);
+        setPrice(element, doc);
+        setImages(element, doc);
+        setDescription(element, doc);
+        setVendor(element, doc);
 
-        Element price = doc.getElementById("viewad-price");
-        if (price != null) {
-            element.setPrice(price.ownText());
-        } else {
-            System.err.println("no price: " + id);
-        }
-
-        if (doc.getElementById("viewad-thumbnails") != null) {
-            Elements elements = doc.getElementById("viewad-thumbnails").getElementsByTag("img");
-            List<String> images = new ArrayList<>();
-            for (Element img : elements) {
-                String link = img.attr("data-imgsrc").replaceFirst("_72", "_57");
-                images.add(link);
-                // try(InputStream in = new URL(link).openStream()){
-                // Files.copy(in,
-                // Paths.get("a.jpg"),StandardCopyOption.REPLACE_EXISTING);
-                // }catch(Exception e){
-                // System.out.println(link);
-                // }
-            }
-            element.setImages(images);
-        }
-
-        Element details = doc.getElementById("viewad-details");
-        element.setDescription(doc.getElementById("viewad-description-text").ownText());
-        // NullPointerException
-        element.setVendorId(doc.getElementById("viewad-contact").getElementsByClass("iconlist-icon-big").first()
-            .getElementsByTag("a").first().attr("href").replaceAll("/s-bestandsliste\\.html\\?userId=", ""));
+        Element details = getDetails(doc);
+        // String price = details.getElementsByAttributeValue("itemprop",
+        // "price").first().attr("content");
+        // String currency = details.getElementsByAttributeValue("itemprop",
+        // "currency").first().attr("content");
+        // details.getElementsByClass("attributelist-striped").first().getElementsByTag("dt")
+        setLocation(element, details);
+        setDate(backupElement, element, details);
+        // String id =
+        // details.getElementsByClass("attributelist-striped").first().getElementsByTag("dd").get(2).ownText();
+        // details.getElementsByAttributeValue("itemprop", "price");
 
         return element;
     }
 
+    private static Element getDetails(Document document) {
+        return document.getElementById("viewad-details").getElementsByClass("l-container").first();
+    }
+
+    public static String linkById(String id) {
+        return Key.decrypt() + "s-anzeige/" + id;
+    }
+
+    private static void setCategory(Ad ad, Document document) {
+        String category[] = document.getElementById("vap-brdcrmb").getElementsByClass("breadcrump-link").last().attr("href")
+            .split("/");
+        ad.setCategory(category[category.length - 1].substring(1));
+    }
+
+    private static void setDate(Element adFromList, Ad ad, Element details) {
+        String date = details.getElementsByClass("attributelist-striped").first().getElementsByTag("dd").get(1).ownText();
+        String time[] = adFromList.getElementsByClass("aditem-addon").first().ownText().split(",");
+        String timee = time[time.length - 1].trim();
+        ad.setTime(date + " " + timee);
+    }
+
+    private static void setDescription(Ad ad, Document document) {
+        ad.setDescription(document.getElementById("viewad-description-text").ownText());
+    }
+
+    private static void setHeadline(Ad ad, Document document) {
+        Element title = document.getElementById("viewad-title");
+        ad.setHeadline(title.ownText());
+    }
+
+    private static void setImages(Ad ad, Document document) {
+        if (document.getElementById("viewad-thumbnails") != null) {
+            Elements elements = document.getElementById("viewad-thumbnails").getElementsByTag("img");
+            List<String> images = new ArrayList<>();
+            for (Element img : elements) {
+                String link = img.attr("data-imgsrc").replaceFirst("_72", "_57");
+                images.add(link);
+            }
+            ad.setImages(images);
+        }
+    }
+
+    private static void setLocation(Ad ad, Element details) {
+        String ort = details.getElementsByClass("attributelist-striped").first().getElementsByTag("dd").get(0).getElementById("viewad-locality").ownText();
+        ad.setLocation(ort);
+    }
+
+    private static void setPrice(Ad ad, Document document) {
+        Element price = document.getElementById("viewad-price");
+        ad.setPrice(price.ownText());
+    }
+
+<<<<<<< HEAD
     public static URL linkById(String id) {
         return Configuration.defaults().resolvePath("s-anzeige/" + id).get();
+=======
+    private static void setVendor(Ad ad, Document document) {
+        ad.setVendorId(document.getElementById("viewad-contact").getElementsByClass("iconlist-text").first()
+            .getElementsByTag("a").first().attr("href").replaceAll("/s-bestandsliste\\.html\\?userId=", ""));
+        ad.setVendorName(document.getElementById("viewad-contact").getElementsByClass("iconlist-text").first()
+            .getElementsByTag("a").first().ownText());
+    }
+
+    private String category;
+
+    private String description = "";
+
+    private String headline = "";
+
+    private String id;
+
+    private List<String> images;
+
+    private String location;
+
+    private String price;
+
+    private boolean printed = false;
+
+    private String subcategory;
+
+    private String time;
+
+    private String vendorId;
+
+    private String vendorName;
+
+    private Ad() {
+>>>>>>> added more information to the Ads
     }
 
     public URL getLink() {
@@ -154,8 +206,8 @@ public class Ad {
         this.vendorId = vendorId;
     }
 
-    private void setVendorNumber(String vendorNumber) {
-        this.vendorNumber = vendorNumber;
+    private void setVendorName(String vendorName) {
+        this.vendorName = vendorName;
     }
 
     @Override
