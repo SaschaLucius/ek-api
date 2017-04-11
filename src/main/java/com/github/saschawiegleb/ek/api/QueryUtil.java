@@ -1,15 +1,14 @@
 package com.github.saschawiegleb.ek.api;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+
+import javaslang.collection.HashMap;
+import javaslang.collection.Map;
+import javaslang.collection.Seq;
 
 public class QueryUtil {
 
@@ -19,25 +18,17 @@ public class QueryUtil {
         return sdf.format(cal.getTime());
     }
 
-    public static List<Ad> listOfAds(Map<Long, Element> ids) {
-        // Elements
-        List<Ad> ad = new ArrayList<>();
-        for (Long id : ids.keySet()) {
-            ad.add(Ad.byId(id, ids.get(id)));
-        }
-        return ad;
+    public static Seq<Ad> listOfAds(Map<Long, Element> ids) {
+        return ids.map(entry -> Ad.byId(entry._1, entry._2));
     }
 
-    public static Map<Long, Element> mapOfElements(Document document) {
-        Map<Long, Element> elementList = new HashMap<>();
-        // list of Elements
-        Elements elements = document.getElementsByClass("aditem");
-        // TODO Lists.newArrayList(Iterable)
-        for (Element element : elements) {
+    static Map<Long, Element> mapOfElements(Document document) {
+        HashMap<Long, Element> map = HashMap.empty();
+        for (Element element : document.getElementsByClass("aditem")) {
             String split1[] = element.getElementsByAttribute("data-href").first().attr("data-href").split("/");
             String split2[] = split1[split1.length - 1].split("-");
-            elementList.put(Long.parseLong(split2[0]), element);
+            map = map.put(Long.parseLong(split2[0]), element);
         }
-        return elementList;
+        return map;
     }
 }

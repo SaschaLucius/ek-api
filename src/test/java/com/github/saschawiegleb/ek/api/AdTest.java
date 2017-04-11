@@ -2,12 +2,12 @@ package com.github.saschawiegleb.ek.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.Test;
+
+import javaslang.Tuple2;
+import javaslang.collection.Map;
 
 public class AdTest implements DefaultConfiguration {
 
@@ -16,8 +16,8 @@ public class AdTest implements DefaultConfiguration {
         Category category = defaultConfiguration.category(245).get();
         Document document = defaultConfiguration.pageDocument(category, 1).get();
         Map<Long, Element> listOfElements = QueryUtil.mapOfElements(document);
-        Entry<Long, Element> entry = listOfElements.entrySet().iterator().next();
-        Ad ad = Ad.byId(entry.getKey(), entry.getValue());
+        Tuple2<Long, Element> entry = listOfElements.head();
+        Ad ad = Ad.byId(entry._1, entry._2);
         // TODO test
     }
 

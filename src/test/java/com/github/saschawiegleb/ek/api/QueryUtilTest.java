@@ -1,14 +1,13 @@
 package com.github.saschawiegleb.ek.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-import java.util.Map;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.Test;
+
+import javaslang.collection.Map;
+import javaslang.collection.Seq;
 
 public class QueryUtilTest implements DefaultConfiguration {
 
@@ -18,8 +17,8 @@ public class QueryUtilTest implements DefaultConfiguration {
         Document document = defaultConfiguration.pageDocument(category, 1).get();
         Map<Long, Element> listOfElements = QueryUtil.mapOfElements(document);
         assertThat(listOfElements).hasSize(27);
-        List<Ad> listOfAds = QueryUtil.listOfAds(listOfElements);
-        assertTrue(listOfAds.size() == 27);
+        Seq<Ad> listOfAds = QueryUtil.listOfAds(listOfElements);
+        assertThat(listOfAds).hasSize(27);
     }
 
     @Test
@@ -28,7 +27,7 @@ public class QueryUtilTest implements DefaultConfiguration {
         Document document = defaultConfiguration.topPageDocument(category, 1).get();
         Map<Long, Element> listOfElements = QueryUtil.mapOfElements(document);
         assertThat(listOfElements.size()).isBetween(1, 27);
-        List<Ad> listOfAds = QueryUtil.listOfAds(listOfElements);
-        assertTrue(listOfAds.size() > 0);
+        Seq<Ad> listOfAds = QueryUtil.listOfAds(listOfElements);
+        assertThat(listOfAds.size()).isGreaterThan(0);
     }
 }
