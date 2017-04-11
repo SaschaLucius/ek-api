@@ -63,8 +63,8 @@ public class Ad {
         return document.getElementById("viewad-details").getElementsByClass("l-container").first();
     }
 
-    public static String linkById(String id) {
-        return Key.decrypt() + "s-anzeige/" + id;
+    public static URL linkById(String id) {
+        return Configuration.defaults().resolvePath("s-anzeige/" + id).get();
     }
 
     private static void setCategory(Ad ad, Document document) {
@@ -111,10 +111,6 @@ public class Ad {
         ad.setPrice(price.ownText());
     }
 
-<<<<<<< HEAD
-    public static URL linkById(String id) {
-        return Configuration.defaults().resolvePath("s-anzeige/" + id).get();
-=======
     private static void setVendor(Ad ad, Document document) {
         ad.setVendorId(document.getElementById("viewad-contact").getElementsByClass("iconlist-text").first()
             .getElementsByTag("a").first().attr("href").replaceAll("/s-bestandsliste\\.html\\?userId=", ""));
@@ -147,7 +143,6 @@ public class Ad {
     private String vendorName;
 
     private Ad() {
->>>>>>> added more information to the Ads
     }
 
     public URL getLink() {
