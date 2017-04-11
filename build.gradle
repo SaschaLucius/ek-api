@@ -27,7 +27,7 @@ buildscript {
 }
 apply plugin: 'com.github.johnrengelman.shadow'
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 jar {
     manifest {
         attributes 'Implementation-Title': description,
@@ -40,6 +40,7 @@ ext.versions = [
         guava: "20.+",
         immutables: "2.4.+",
         jsoup: "1.10.+",
+        javaslang: "2.0.+",
         junit: "4.+",
 ]
 
@@ -51,6 +52,7 @@ dependencies {
     apt group: "org.immutables", name: "value", version: versions.immutables
     compileOnly group: "org.immutables", name: "value", version: versions.immutables, classifier: 'annotations'
     compile group: "com.google.guava", name: "guava", version: versions.guava
+    compile group: "io.javaslang", name: "javaslang", version: versions.javaslang
     compile group: "org.jsoup", name: "jsoup", version: versions.jsoup
     testCompile group: "org.assertj", name: "assertj-core", version: versions.assertj
     testCompile group: "junit", name: "junit", version: versions.junit
