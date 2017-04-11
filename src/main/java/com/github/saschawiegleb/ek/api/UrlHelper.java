@@ -24,7 +24,7 @@ public class UrlHelper {
             add += searchString + "/";
         }
 
-        path.append(add).append("c").append(category.getId());
+        path.append(add).append("c").append(category.id());
         return Configuration.defaults().resolvePath(path.toString());
     }
 
@@ -37,7 +37,7 @@ public class UrlHelper {
             }
             add += "seite:" + Integer.toString(seite) + "/";
         }
-        path.append(add).append("c").append(category.getId());
+        path.append(add).append("c").append(category.id());
         return Configuration.defaults().resolvePath(path.toString());
     }
 }

@@ -11,11 +11,12 @@ import org.junit.Test;
 
 import javaslang.control.Try;
 
-public class AdTest {
+public class AdTest implements DefaultConfiguration {
 
     @Test
     public void testAdById() {
-        Try<URL> url = UrlHelper.getPageURL(Category.byId(245), 1, null);
+        Category category = defaultConfiguration.category(245).get();
+        Try<URL> url = UrlHelper.getPageURL(category, 1, null);
         Map<Long, Element> listOfElements = QueryUtil.mapOfElements(url.get());
         Entry<Long, Element> entry = listOfElements.entrySet().iterator().next();
         Ad ad = Ad.byId(entry.getKey(), entry.getValue());

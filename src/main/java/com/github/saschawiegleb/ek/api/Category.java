@@ -1,75 +1,18 @@
 package com.github.saschawiegleb.ek.api;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Parameter;
 
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
+@Immutable
+abstract class Category {
 
-public class Category {
-
-    private static Map<Integer, String> _cache = new HashMap<>();
-    static {
-        refreshCache();
+    static Category of(int id, String name) {
+        return ImmutableCategory.of(id, name);
     }
 
-    private Integer id;
-    private String name;
+    @Parameter(order = 1)
+    abstract int id();
 
-    private Category(Integer id, String name) {
-        super();
-        this.id = id;
-        this.name = name;
-    }
-
-    public static Category byId(Integer id) {
-        return new Category(id, _cache.get(id));
-    }
-
-    public static void refreshCache() {
-        _cache.clear();
-        Document doc = Configuration.defaults()
-            .resolvePath("s-kategorien.html")
-            .flatMap(url -> Reader.requestDocument(url)).get();
-
-        for (Element ele : doc.getElementsByClass("l-row l-container-row").first().getElementsByTag("a")) {
-            String cat[] = ele.attr("href").split("/");
-
-            String key = cat[cat.length - 1].substring(1);
-            String value1 = cat[1].substring(2);
-            String value2 = ele.ownText();
-
-            String test = value2.replaceAll(", ", "-");
-            test = test.replaceAll(" & ", "-");
-            test = test.replaceAll("ö", "oe");
-            test = test.replaceAll("Ö", "Oe");
-            test = test.replaceAll("ä", "ae");
-            test = test.replaceAll("Ä", "Ae");
-            test = test.replaceAll("ü", "ue");
-            test = test.replaceAll("Ü", "Ue");
-            test = test.replaceAll("--", "-");
-            test = test.replaceAll("--", "-");
-            test = test.replaceAll("  ", " ");
-            test = test.replaceAll("  ", " ");
-            test = test.replaceAll(" ", "-");
-
-            if (!value1.equalsIgnoreCase(test) && !test.toLowerCase().contains(value1)) {
-                value2 = value1 + ": " + value2;
-            }
-
-            _cache.put(Integer.valueOf(key), value2);
-        }
-    }
-
-    public Map<Integer, String> getAllCategories() {
-        return _cache;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
+    @Parameter(order = 2)
+    abstract String name();
 }
