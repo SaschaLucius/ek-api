@@ -23,10 +23,10 @@ public class QueryUtilTest implements DefaultConfiguration {
     }
 
     @Test
-    public void topTest() {
+    public void topPageTest() {
         Category category = defaultConfiguration.category(245).get();
-        URL url = UrlHelper.getTopPageURL(category, 1).get();
-        Map<Long, Element> listOfElements = QueryUtil.mapOfElements(url);
+        URL topPageUrl = defaultConfiguration.topPageUrl(category, 1).get();
+        Map<Long, Element> listOfElements = QueryUtil.mapOfElements(topPageUrl);
         assertThat(listOfElements.size()).isBetween(1, 27);
         List<Ad> listOfAds = QueryUtil.listOfAds(listOfElements);
         assertTrue(listOfAds.size() > 0);

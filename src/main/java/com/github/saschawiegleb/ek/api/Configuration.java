@@ -131,5 +131,18 @@ abstract class Configuration {
 
     final Try<URL> resolvePath(String path) {
         return Try.of(() -> new URL(baseUrl(), path));
+    }
+
+    final Try<URL> topPageUrl(Category category, int page) {
+        StringBuilder path = new StringBuilder();
+        String add = "topAds/";
+        if (page > 1) {
+            if (page > pageLimit()) {
+                page = pageLimit();
+            }
+            add += "seite:" + Integer.toString(page) + "/";
+        }
+        path.append(add).append("c").append(category.id());
+        return Configuration.defaults().resolvePath(path.toString());
     };
 }
