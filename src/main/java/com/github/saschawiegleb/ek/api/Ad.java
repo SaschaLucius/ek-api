@@ -1,11 +1,8 @@
 package com.github.saschawiegleb.ek.api;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -27,69 +24,60 @@ public class Ad {
 														// "user-xxx-id"
 		Ad element = new Ad();
 		element.setId(id);
-		try {
-			Connection.Response response = Jsoup.connect(linkById(id)).execute();
-			if (response.statusCode() != 200) {
-				System.err.println("Error Code: " + response.statusCode());
-			}
-			Document doc = response.parse();
+		Document doc = Rest.get(linkById(id));
 
-			if (doc.getElementById("viewad-adexpired") != null || doc.getElementById("home") != null) {
-				System.out.println("already expired");
-				if (backupElement != null) {
-					return byElement(id, backupElement);
-				} else {
-					element.setHeadline("Artikel bereits verkauft.");
-					return element;
-				}
-			}
-
-			Element category = doc.getElementById("vap-brdcrmb");
-			Element title = doc.getElementById("viewad-title");
-			if (title != null) {
-				element.setHeadline(title.ownText());
+		if (doc.getElementById("viewad-adexpired") != null || doc.getElementById("home") != null) {
+			System.out.println("already expired");
+			if (backupElement != null) {
+				return byElement(id, backupElement);
 			} else {
-				System.err.println("no title: " + id);
+				element.setHeadline("Artikel bereits verkauft.");
+				return element;
 			}
-
-			Element price = doc.getElementById("viewad-price");
-			if (price != null) {
-				element.setPrice(price.ownText());
-			} else {
-				System.err.println("no price: " + id);
-			}
-
-			if (doc.getElementById("viewad-thumbnails") != null) {
-				Elements elements = doc.getElementById("viewad-thumbnails").getElementsByTag("img");
-				List<String> images = new ArrayList<String>();
-				for (Element img : elements) {
-					String link = img.attr("data-imgsrc").replaceFirst("_72", "_57");
-					images.add(link);
-					// try(InputStream in = new URL(link).openStream()){
-					// Files.copy(in,
-					// Paths.get("a.jpg"),StandardCopyOption.REPLACE_EXISTING);
-					// }catch(Exception e){
-					// System.out.println(link);
-					// }
-				}
-				element.setImages(images);
-			}
-
-			Element details = doc.getElementById("viewad-details");
-			element.setDescription(doc.getElementById("viewad-description-text").ownText());
-			// NullPointerException
-			element.setVendorId(doc.getElementById("viewad-contact").getElementsByClass("iconlist-icon-big").first()
-					.getElementsByTag("a").first().attr("href").replaceAll("/s-bestandsliste\\.html\\?userId=", ""));
-
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
+
+		Element category = doc.getElementById("vap-brdcrmb");
+		Element title = doc.getElementById("viewad-title");
+		if (title != null) {
+			element.setHeadline(title.ownText());
+		} else {
+			System.err.println("no title: " + id);
+		}
+
+		Element price = doc.getElementById("viewad-price");
+		if (price != null) {
+			element.setPrice(price.ownText());
+		} else {
+			System.err.println("no price: " + id);
+		}
+
+		if (doc.getElementById("viewad-thumbnails") != null) {
+			Elements elements = doc.getElementById("viewad-thumbnails").getElementsByTag("img");
+			List<String> images = new ArrayList<String>();
+			for (Element img : elements) {
+				String link = img.attr("data-imgsrc").replaceFirst("_72", "_57");
+				images.add(link);
+				// try(InputStream in = new URL(link).openStream()){
+				// Files.copy(in,
+				// Paths.get("a.jpg"),StandardCopyOption.REPLACE_EXISTING);
+				// }catch(Exception e){
+				// System.out.println(link);
+				// }
+			}
+			element.setImages(images);
+		}
+
+		Element details = doc.getElementById("viewad-details");
+		element.setDescription(doc.getElementById("viewad-description-text").ownText());
+		// NullPointerException
+		element.setVendorId(doc.getElementById("viewad-contact").getElementsByClass("iconlist-icon-big").first()
+				.getElementsByTag("a").first().attr("href").replaceAll("/s-bestandsliste\\.html\\?userId=", ""));
 
 		return element;
 	}
 
 	public static String linkById(String id) {
-		return  Key.decrypt() + "s-anzeige/" + id;
+		return Key.decrypt() + "s-anzeige/" + id;
 	}
 
 	// leads to approx 1kb per entry -> 1 million entries per GB RAM

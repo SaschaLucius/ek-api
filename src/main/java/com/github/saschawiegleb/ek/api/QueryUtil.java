@@ -1,6 +1,5 @@
 package com.github.saschawiegleb.ek.api;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -8,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -32,17 +29,7 @@ public class QueryUtil {
 
 	public static Map<Long, Element> mapOfElements(String url) {
 		Map<Long, Element> elementList = new HashMap<Long, Element>();
-		Document doc = null;
-		try {
-			Connection.Response response = Jsoup.connect(url).execute();
-			if (response.statusCode() != 200) {
-				System.err.println("Error Code: " + response.statusCode());
-			}
-			doc = response.parse();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return elementList;
-		}
+		Document doc = Rest.get(url);
 		// list of Elements
 		Elements elements = doc.getElementsByClass("aditem");
 		//TODO Lists.newArrayList(Iterable)
