@@ -36,10 +36,10 @@ jar {
 }
 
 ext.versions = [
-        assertj: "2.+",
-        guava: "11.+",
-        immutables: "2.+",
-        jsoup: "1.+",
+        assertj: "2.6.+",
+        guava: "20.+",
+        immutables: "2.4.+",
+        jsoup: "1.10.+",
         junit: "4.+",
 ]
 
