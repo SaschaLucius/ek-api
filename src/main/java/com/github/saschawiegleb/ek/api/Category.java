@@ -8,67 +8,66 @@ import org.jsoup.nodes.Element;
 
 public class Category {
 
-	private static Map<Integer, String> _cache = new HashMap<Integer, String>();
-	static {
-		refreshCache();
-	}
+    private static Map<Integer, String> _cache = new HashMap<>();
+    static {
+        refreshCache();
+    }
 
-	public static Category byId(Integer id) {
-		return new Category(id, _cache.get(id));
-	}
+    private Integer id;
+    private String name;
 
-	public static void refreshCache() {
-		_cache.clear();
-		Document doc = Rest.get(Key.decrypt() + "s-kategorien.html");
+    private Category(Integer id, String name) {
+        super();
+        this.id = id;
+        this.name = name;
+    }
 
-		for (Element ele : doc.getElementsByClass("l-row l-container-row").first().getElementsByTag("a")) {
-			String cat[] = ele.attr("href").split("/");
+    public static Category byId(Integer id) {
+        return new Category(id, _cache.get(id));
+    }
 
-			String key = cat[cat.length - 1].substring(1);
-			String value1 = cat[1].substring(2);
-			String value2 = ele.ownText();
+    public static void refreshCache() {
+        _cache.clear();
+        Document doc = Rest.get(Key.decrypt() + "s-kategorien.html");
 
-			String test = value2.replaceAll(", ", "-");
-			test = test.replaceAll(" & ", "-");
-			test = test.replaceAll("ö", "oe");
-			test = test.replaceAll("Ö", "Oe");
-			test = test.replaceAll("ä", "ae");
-			test = test.replaceAll("Ä", "Ae");
-			test = test.replaceAll("ü", "ue");
-			test = test.replaceAll("Ü", "Ue");
-			test = test.replaceAll("--", "-");
-			test = test.replaceAll("--", "-");
-			test = test.replaceAll("  ", " ");
-			test = test.replaceAll("  ", " ");
-			test = test.replaceAll(" ", "-");
+        for (Element ele : doc.getElementsByClass("l-row l-container-row").first().getElementsByTag("a")) {
+            String cat[] = ele.attr("href").split("/");
 
-			if (!value1.equalsIgnoreCase(test) && !test.toLowerCase().contains(value1)) {
-				value2 = value1 + ": " + value2;
-			}
+            String key = cat[cat.length - 1].substring(1);
+            String value1 = cat[1].substring(2);
+            String value2 = ele.ownText();
 
-			_cache.put(Integer.valueOf(key), value2);
-		}
-	}
+            String test = value2.replaceAll(", ", "-");
+            test = test.replaceAll(" & ", "-");
+            test = test.replaceAll("ö", "oe");
+            test = test.replaceAll("Ö", "Oe");
+            test = test.replaceAll("ä", "ae");
+            test = test.replaceAll("Ä", "Ae");
+            test = test.replaceAll("ü", "ue");
+            test = test.replaceAll("Ü", "Ue");
+            test = test.replaceAll("--", "-");
+            test = test.replaceAll("--", "-");
+            test = test.replaceAll("  ", " ");
+            test = test.replaceAll("  ", " ");
+            test = test.replaceAll(" ", "-");
 
-	private Integer id;
+            if (!value1.equalsIgnoreCase(test) && !test.toLowerCase().contains(value1)) {
+                value2 = value1 + ": " + value2;
+            }
 
-	private String name;
+            _cache.put(Integer.valueOf(key), value2);
+        }
+    }
 
-	private Category(Integer id, String name) {
-		super();
-		this.id = id;
-		this.name = name;
-	}
+    public Map<Integer, String> getAllCategories() {
+        return _cache;
+    }
 
-	public Map<Integer, String> getAllCategories() {
-		return _cache;
-	}
+    public Integer getId() {
+        return id;
+    }
 
-	public Integer getId() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 }

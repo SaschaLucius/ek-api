@@ -7,8 +7,8 @@ import org.junit.Test;
 
 public class RestTest {
 
-	@Test
-	public void getTest() throws Exception {
-		assertThat(Rest.get(Key.decrypt())).isNotEqualTo(new Document(Key.decrypt()));
-	}
+    @Test
+    public void getTest() throws Exception {
+        assertThat(Rest.get(Key.decrypt())).isNotEqualTo(new Document(Key.decrypt()));
+    }
 }
