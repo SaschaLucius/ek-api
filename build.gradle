@@ -1,0 +1,55 @@
+description = "EK API"
+group = 'com.github.saschawiegleb'
+version = '1.0'
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.10"
+    }
+}
+apply plugin: "net.ltgt.apt"
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+    }
+}
+apply plugin: 'com.github.johnrengelman.shadow'
+
+sourceCompatibility = 1.7
+jar {
+    manifest {
+        attributes 'Implementation-Title': description,
+                   'Implementation-Version': version
+    }
+}
+
+ext.versions = [
+        assertj: "2.+",
+        immutables: "2.+",
+        jsoup: "1.+",
+        junit: "4.+",
+]
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    apt group: "org.immutables", name: "value", version: versions.immutables
+    compileOnly group: "org.immutables", name: "value", version: versions.immutables, classifier: 'annotations'
+    compile group: "org.jsoup", name: "jsoup", version: versions.jsoup
+    testCompile group: "org.assertj", name: "assertj-core", version: versions.assertj
+    testCompile group: "junit", name: "junit", version: versions.junit
+}
