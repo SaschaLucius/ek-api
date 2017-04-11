@@ -36,7 +36,7 @@ public class Ad {
 			}
 		}
 
-		Element category = doc.getElementById("vap-brdcrmb");
+		String category = doc.getElementById("vap-brdcrmb").getElementsByClass("breadcrump-link").last().attr("href");
 		Element title = doc.getElementById("viewad-title");
 		if (title != null) {
 			element.setHeadline(title.ownText());

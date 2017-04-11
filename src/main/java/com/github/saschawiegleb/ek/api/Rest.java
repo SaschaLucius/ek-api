@@ -12,8 +12,9 @@ public class Rest {
 		try {
 			Connection.Response response = Jsoup.connect(url).execute();
 			if (response.statusCode() == 200) {
-				System.err.println("Error Code: " + response.statusCode());
 				doc = response.parse();
+			}else{
+				System.err.println("Error Code: " + response.statusCode());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
