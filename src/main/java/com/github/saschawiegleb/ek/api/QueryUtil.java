@@ -45,7 +45,7 @@ public class QueryUtil {
 		}
 		// list of Elements
 		Elements elements = doc.getElementsByClass("aditem");
-		// Lists.newArrayList(Iterable)
+		//TODO Lists.newArrayList(Iterable)
 		for (Element element : elements) {
 			String split1[] = element.getElementsByAttribute("data-href").first().attr("data-href").split("/");
 			String split2[] = split1[split1.length - 1].split("-");

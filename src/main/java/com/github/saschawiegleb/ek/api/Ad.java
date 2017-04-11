@@ -11,8 +11,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class Ad {
-	static final String BASE_URL = Key.decrypt();
-
 	public static Ad byElement(String id, Element backupElement) {
 		Ad element = new Ad();
 		element.setId(id);
@@ -91,7 +89,7 @@ public class Ad {
 	}
 
 	public static String linkById(String id) {
-		return BASE_URL + "s-anzeige/" + id;
+		return  Key.decrypt() + "s-anzeige/" + id;
 	}
 
 	// leads to approx 1kb per entry -> 1 million entries per GB RAM
@@ -116,7 +114,7 @@ public class Ad {
 	}
 
 	public String getLink() {
-		return BASE_URL + "s-anzeige/" + id;
+		return Key.decrypt() + "s-anzeige/" + id;
 	}
 
 	public boolean isPrinted() {
@@ -179,5 +177,4 @@ public class Ad {
 	public String toString() {
 		return "Ad [headline=" + headline + ", id=" + id + ", getLink()=" + getLink() + "]";
 	}
-
 }
