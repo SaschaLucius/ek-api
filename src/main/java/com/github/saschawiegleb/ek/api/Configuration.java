@@ -3,7 +3,6 @@ package com.github.saschawiegleb.ek.api;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Lazy;
 import org.jsoup.nodes.Document;
@@ -26,22 +25,25 @@ abstract class Configuration {
 
     private static final String categoriesPath = new String(new byte[] { 115, 45, 107, 97, 116, 101, 103, 111, 114, 105, 101, 110, 46, 104, 116, 109, 108 });
 
+    private static final int pageLimit = 50;
+
     static Configuration defaults() {
-        return of(baseUrl);
+        return of(baseUrl, pageLimit);
     }
 
-    static Configuration of(String baseUrl) {
+    static Configuration of(String baseUrl, int pagelimit) {
         try {
-            return of(new URL(baseUrl));
+            return of(new URL(baseUrl), pagelimit);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    static Configuration of(URL base) {
+    static Configuration of(URL base, int pagelimit) {
         return ImmutableConfiguration.builder()
             .baseUrl(base)
             .categoriesUrl(resolvePath(base, categoriesPath))
+            .pageLimit(pagelimit)
             .build();
     }
 
@@ -100,10 +102,7 @@ abstract class Configuration {
         return categories().map(cs -> cs.find(c -> c.id() == id).get());
     }
 
-    @Default
-    int pageLimit() {
-        return 50;
-    }
+    abstract int pageLimit();
 
     final Try<URL> pageUrl(Category category, int pageNumber) {
         return pageUrl(category, pageNumber, Option.none());
