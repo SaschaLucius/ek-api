@@ -15,8 +15,8 @@ public class QueryUtilTest implements DefaultConfiguration {
     @Test
     public void categoryTest() {
         Category category = defaultConfiguration.category(245).get();
-        URL url = UrlHelper.getPageURL(category, 1, null).get();
-        Map<Long, Element> listOfElements = QueryUtil.mapOfElements(url);
+        URL pageUrl = defaultConfiguration.pageUrl(category, 1).get();
+        Map<Long, Element> listOfElements = QueryUtil.mapOfElements(pageUrl);
         assertThat(listOfElements).hasSize(27);
         List<Ad> listOfAds = QueryUtil.listOfAds(listOfElements);
         assertTrue(listOfAds.size() == 27);

@@ -11,23 +11,6 @@ public class UrlHelper {
         return Configuration.defaults().resolvePath("/s-seite:" + Integer.toString(seite) + "/" + search + "/k0");
     }
 
-    public static Try<URL> getPageURL(Category category, int pageNumber, String searchString) {
-        StringBuilder path = new StringBuilder();
-        String add = "";
-        if (pageNumber > 1) {
-            if (pageNumber > PAGE_LIMIT) {
-                pageNumber = PAGE_LIMIT;
-            }
-            add += "seite:" + Integer.toString(pageNumber) + "/";
-        }
-        if (searchString != null && !searchString.isEmpty()) {
-            add += searchString + "/";
-        }
-
-        path.append(add).append("c").append(category.id());
-        return Configuration.defaults().resolvePath(path.toString());
-    }
-
     public static Try<URL> getTopPageURL(Category category, int seite) {
         StringBuilder path = new StringBuilder();
         String add = "topAds/";

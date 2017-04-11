@@ -3,12 +3,14 @@ package com.github.saschawiegleb.ek.api;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Lazy;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import javaslang.collection.List;
+import javaslang.control.Option;
 import javaslang.control.Try;
 
 @Immutable
@@ -96,6 +98,35 @@ abstract class Configuration {
 
     final Try<Category> category(int id) {
         return categories().map(cs -> cs.find(c -> c.id() == id).get());
+    }
+
+    @Default
+    int pageLimit() {
+        return 50;
+    }
+
+    final Try<URL> pageUrl(Category category, int pageNumber) {
+        return pageUrl(category, pageNumber, Option.none());
+    }
+
+    final Try<URL> pageUrl(Category category, int pageNumber, Option<String> searchString) {
+        StringBuilder path = new StringBuilder();
+        String add = "";
+        if (pageNumber > 1) {
+            if (pageNumber > pageLimit()) {
+                pageNumber = pageLimit();
+            }
+            add += "seite:" + Integer.toString(pageNumber) + "/";
+        }
+        if (!searchString.getOrElse("").isEmpty()) {
+            add += searchString + "/";
+        }
+        path.append(add).append("c").append(category.id());
+        return resolvePath(path.toString());
+    }
+
+    final Try<URL> pageUrl(Category category, int pageNumber, String searchString) {
+        return pageUrl(category, pageNumber, Option.of(searchString));
     }
 
     final Try<URL> resolvePath(String path) {
