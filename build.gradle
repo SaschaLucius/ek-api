@@ -37,7 +37,7 @@ jar {
 
 ext.versions = [
         assertj: "2.6.+",
-        guava: "20.+",
+        guava: "21.+",
         immutables: "2.4.+",
         jsoup: "1.10.+",
         javaslang: "2.0.+",
