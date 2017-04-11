@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ public class QueryUtilTest {
     @Test
     public void categoryTest() throws IOException {
         // URL
-        String url = UrlHelper.getPageURL(Category.byId(245), 1, null);
+        URL url = UrlHelper.getPageURL(Category.byId(245), 1, null).get();
         Map<Long, Element> listOfElements = QueryUtil.mapOfElements(url);
         assertThat(listOfElements).hasSize(27);
         List<Ad> listOfAds = QueryUtil.listOfAds(listOfElements);
@@ -25,7 +26,7 @@ public class QueryUtilTest {
     @Test
     public void topTest() throws IOException {
         // URL
-        String url = UrlHelper.getTopPageURL(Category.byId(245), 1);
+        URL url = UrlHelper.getTopPageURL(Category.byId(245), 1).get();
         Map<Long, Element> listOfElements = QueryUtil.mapOfElements(url);
         assertThat(listOfElements.size()).isBetween(1, 27);
         List<Ad> listOfAds = QueryUtil.listOfAds(listOfElements);

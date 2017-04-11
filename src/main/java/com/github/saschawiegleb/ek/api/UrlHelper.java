@@ -1,15 +1,18 @@
 package com.github.saschawiegleb.ek.api;
 
+import java.net.URL;
+
+import javaslang.control.Try;
+
 public class UrlHelper {
     private static final int PAGE_LIMIT = 50;
 
-    public static String getGlobalSearchURL(String search, int seite) {
-        return Key.decrypt() + "/s-seite:" + Integer.toString(seite) + "/" + search + "/k0";
+    public static Try<URL> getGlobalSearchURL(String search, int seite) {
+        return Configuration.defaults().resolvePath("/s-seite:" + Integer.toString(seite) + "/" + search + "/k0");
     }
 
-    public static String getPageURL(Category category, int pageNumber, String searchString) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(Key.decrypt());
+    public static Try<URL> getPageURL(Category category, int pageNumber, String searchString) {
+        StringBuilder path = new StringBuilder();
         String add = "";
         if (pageNumber > 1) {
             if (pageNumber > PAGE_LIMIT) {
@@ -21,13 +24,12 @@ public class UrlHelper {
             add += searchString + "/";
         }
 
-        builder.append(add).append("c").append(category.getId());
-        return builder.toString();
+        path.append(add).append("c").append(category.getId());
+        return Configuration.defaults().resolvePath(path.toString());
     }
 
-    public static String getTopPageURL(Category category, int seite) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(Key.decrypt());
+    public static Try<URL> getTopPageURL(Category category, int seite) {
+        StringBuilder path = new StringBuilder();
         String add = "topAds/";
         if (seite > 1) {
             if (seite > PAGE_LIMIT) {
@@ -35,7 +37,7 @@ public class UrlHelper {
             }
             add += "seite:" + Integer.toString(seite) + "/";
         }
-        builder.append(add).append("c").append(category.getId());
-        return builder.toString();
+        path.append(add).append("c").append(category.getId());
+        return Configuration.defaults().resolvePath(path.toString());
     }
 }

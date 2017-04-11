@@ -1,5 +1,6 @@
 package com.github.saschawiegleb.ek.api;
 
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -28,7 +29,7 @@ public class QueryUtil {
         return ad;
     }
 
-    public static Map<Long, Element> mapOfElements(String url) {
+    public static Map<Long, Element> mapOfElements(URL url) {
         Map<Long, Element> elementList = new HashMap<>();
         Document doc = Reader.requestDocument(url).get();
         // list of Elements

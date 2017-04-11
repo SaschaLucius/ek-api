@@ -2,13 +2,24 @@ package com.github.saschawiegleb.ek.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
 import org.junit.Test;
 
 public class ReaderTest {
 
     @Test
-    public void readDocument() {
-        assertThat(Reader.requestDocument(Key.decrypt()).get()).isNotEqualTo(new Document(Key.decrypt()));
+    public void readDocument_200() throws MalformedURLException {
+        URL url = new URL("http://ccc.de/");
+        assertThat(Reader.requestDocument(url).get()).isInstanceOf(Document.class);
+    }
+
+    @Test
+    public void readDocument_404() throws MalformedURLException {
+        URL url = new URL("http://ccc.de/not-found");
+        assertThat(Reader.requestDocument(url).getCause()).isInstanceOf(HttpStatusException.class).hasMessage("HTTP error fetching URL");
     }
 }

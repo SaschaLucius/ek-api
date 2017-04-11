@@ -1,5 +1,6 @@
 package com.github.saschawiegleb.ek.api;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,12 +94,12 @@ public class Ad {
         return element;
     }
 
-    public static String linkById(String id) {
-        return Key.decrypt() + "s-anzeige/" + id;
+    public static URL linkById(String id) {
+        return Configuration.defaults().resolvePath("s-anzeige/" + id).get();
     }
 
-    public String getLink() {
-        return Key.decrypt() + "s-anzeige/" + id;
+    public URL getLink() {
+        return linkById(id);
     }
 
     public boolean isPrinted() {
