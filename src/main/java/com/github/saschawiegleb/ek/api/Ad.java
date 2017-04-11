@@ -41,7 +41,7 @@ public class Ad {
                                                       // "user-xxx-id"
         Ad element = new Ad();
         element.setId(id);
-        Document doc = Rest.get(linkById(id));
+        Document doc = Reader.requestDocument(linkById(id)).get();
 
         if (doc.getElementById("viewad-adexpired") != null || doc.getElementById("home") != null) {
             System.out.println("already expired");

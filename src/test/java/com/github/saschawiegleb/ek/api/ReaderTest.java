@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.jsoup.nodes.Document;
 import org.junit.Test;
 
-public class RestTest {
+public class ReaderTest {
 
     @Test
-    public void getTest() throws Exception {
-        assertThat(Rest.get(Key.decrypt())).isNotEqualTo(new Document(Key.decrypt()));
+    public void readDocument() {
+        assertThat(Reader.requestDocument(Key.decrypt()).get()).isNotEqualTo(new Document(Key.decrypt()));
     }
 }

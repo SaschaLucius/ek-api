@@ -28,7 +28,7 @@ public class Category {
 
     public static void refreshCache() {
         _cache.clear();
-        Document doc = Rest.get(Key.decrypt() + "s-kategorien.html");
+        Document doc = Reader.requestDocument(Key.decrypt() + "s-kategorien.html").get();
 
         for (Element ele : doc.getElementsByClass("l-row l-container-row").first().getElementsByTag("a")) {
             String cat[] = ele.attr("href").split("/");

@@ -30,7 +30,7 @@ public class QueryUtil {
 
     public static Map<Long, Element> mapOfElements(String url) {
         Map<Long, Element> elementList = new HashMap<>();
-        Document doc = Rest.get(url);
+        Document doc = Reader.requestDocument(url).get();
         // list of Elements
         Elements elements = doc.getElementsByClass("aditem");
         // TODO Lists.newArrayList(Iterable)
