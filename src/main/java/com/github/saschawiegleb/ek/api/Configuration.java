@@ -102,13 +102,17 @@ abstract class Configuration {
         return categories().map(cs -> cs.find(c -> c.id() == id).get());
     }
 
-    abstract int pageLimit();
-
-    final Try<URL> pageUrl(Category category, int pageNumber) {
-        return pageUrl(category, pageNumber, Option.none());
+    final Try<Document> pageDocument(Category category, int pageNumber) {
+        return pageUrl(category, pageNumber, Option.none()).flatMap(url -> Reader.requestDocument(url));
     }
 
-    final Try<URL> pageUrl(Category category, int pageNumber, Option<String> searchString) {
+    final Try<Document> pageDocument(Category category, int pageNumber, String searchString) {
+        return pageUrl(category, pageNumber, Option.of(searchString)).flatMap(url -> Reader.requestDocument(url));
+    }
+
+    abstract int pageLimit();
+
+    private final Try<URL> pageUrl(Category category, int pageNumber, Option<String> searchString) {
         StringBuilder path = new StringBuilder();
         String add = "";
         if (pageNumber > 1) {
@@ -124,15 +128,15 @@ abstract class Configuration {
         return resolvePath(path.toString());
     }
 
-    final Try<URL> pageUrl(Category category, int pageNumber, String searchString) {
-        return pageUrl(category, pageNumber, Option.of(searchString));
-    }
-
     final Try<URL> resolvePath(String path) {
         return Try.of(() -> new URL(baseUrl(), path));
     }
 
-    final Try<URL> topPageUrl(Category category, int page) {
+    final Try<Document> topPageDocument(Category category, int page) {
+        return topPageUrl(category, page).flatMap(url -> Reader.requestDocument(url));
+    };
+
+    private final Try<URL> topPageUrl(Category category, int page) {
         StringBuilder path = new StringBuilder();
         String add = "topAds/";
         if (page > 1) {
