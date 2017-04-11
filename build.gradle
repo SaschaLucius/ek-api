@@ -67,6 +67,8 @@ tasks.eclipse.doLast {
     // formatter application preferences
     File formatterApplicationPrefs = file("${project.projectDir}/.settings/org.eclipse.jdt.core.prefs")
     formatterApplicationPrefs.append('''
+        org.eclipse.jdt.core.formatter.continuation_indentation=1
+        org.eclipse.jdt.core.formatter.continuation_indentation_for_array_initializer=1
         org.eclipse.jdt.core.formatter.indentation.size=4
         org.eclipse.jdt.core.formatter.join_wrapped_lines=false
         org.eclipse.jdt.core.formatter.lineSplit=200
