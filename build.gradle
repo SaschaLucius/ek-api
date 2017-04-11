@@ -57,3 +57,12 @@ dependencies {
     testCompile group: "org.assertj", name: "assertj-core", version: versions.assertj
     testCompile group: "junit", name: "junit", version: versions.junit
 }
+
+tasks.cleanEclipse.doLast {
+    delete("${project.projectDir}/.settings/org.eclipse.jdt.core.prefs")
+}
+
+tasks.eclipse.doLast {
+    file("${project.projectDir}/.settings/org.eclipse.jdt.core.prefs")
+        .append("org.eclipse.jdt.core.formatter.join_wrapped_lines=false\n")
+}
