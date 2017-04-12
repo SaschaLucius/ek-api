@@ -3,6 +3,8 @@ package com.github.saschawiegleb.ek.api;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatterBuilder;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
@@ -38,11 +40,8 @@ abstract class Ad {
         setVendor(builder, doc);
         setLocation(builder, doc);
         setDate(element, builder, doc);
+        setAdditionslDetails(builder, doc);
         return builder.build();
-    }
-
-    private static Elements getDetails(Document document) {
-        return document.select("#viewad-details > section > dl");
     }
 
     static URL linkById(long id) {
@@ -50,8 +49,34 @@ abstract class Ad {
         return Configuration.defaults().resolvePath("s-anzeige/" + id).get();
     }
 
+    private static void setAdditionslDetails(Builder builder, Document document) {
+        Elements keys = document.select("#viewad-details > section > dl dt");
+        Elements values = document.select("#viewad-details > section > dl dd");
+
+        Map<String, String> details = new HashMap<>();
+        for (int i = 0; i < keys.size(); i++) {
+            String key = keys.get(i).ownText();
+            String value = values.get(i).ownText().trim();
+            if (value.isEmpty() && values.get(i).child(0) != null) {
+                value = values.get(i).child(0).ownText();
+            }
+            if (value.isEmpty() && values.get(i).child(0).child(0) != null) {
+                value = values.get(i).child(0).child(0).ownText();
+            }
+            if (value.replaceAll(",", "").trim().isEmpty()) {
+                value = "";
+                for (Element e : values.get(i).getElementsByTag("a")) {
+                    value += e.ownText() + ",";
+                }
+            }
+            details.put(key, !value.isEmpty() ? value : values.get(i).child(0).ownText());
+        }
+        // TODO set in immutable type
+        System.out.println(details);
+    }
+
     private static void setCategory(Builder builder, Document document) {
-        String category[] = document.select("#vap-brdcrmb").first().getElementsByClass("breadcrump-link").last().attr("href").split("/");
+        String category[] = document.select("#vap-brdcrmb > a:nth-last-child(1)").first().attr("href").split("/");
         builder.category(category[category.length - 1].substring(1));
     }
 
@@ -72,13 +97,12 @@ abstract class Ad {
     }
 
     private static void setHeadline(Builder builder, Document document) {
-        Element title = document.select("#viewad-title").first();
-        builder.headline(title.ownText());
+        builder.headline(document.select("#viewad-title").first().ownText());
     }
 
     private static void setImages(Builder builder, Document document) {
         if (document.select("#viewad-thumbnails") != null) {
-            Elements elements = document.select("#viewad-thumbnails").first().getElementsByTag("img");
+            Elements elements = document.select("#viewad-thumbnail-list img");
             List<String> images = List.empty();
             for (Element img : elements) {
                 String link = img.attr("data-imgsrc").replaceFirst("_72", "_57");
@@ -89,13 +113,11 @@ abstract class Ad {
     }
 
     private static void setLocation(Builder builder, Document document) {
-        String ort = document.select("#viewad-locality").first().ownText();
-        builder.location(ort);
+        builder.location(document.select("#viewad-locality").first().ownText());
     }
 
     private static void setPrice(Builder builder, Document document) {
-        Element price = document.select("#viewad-price").first();
-        builder.price(price.ownText().replaceAll("Preis: ", ""));
+        builder.price(document.select("#viewad-price").first().ownText().replaceAll("Preis: ", ""));
     }
 
     private static void setVendor(Builder builder, Document document) {

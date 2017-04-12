@@ -16,10 +16,8 @@ final class Parser {
 
     static Map<Long, Element> parseElements(Document document) {
         HashMap<Long, Element> map = HashMap.empty();
-        for (Element element : document.getElementsByClass("aditem")) {
-            String split1[] = element.getElementsByAttribute("data-href").first().attr("data-href").split("/");
-            String split2[] = split1[split1.length - 1].split("-");
-            map = map.put(Long.parseLong(split2[0]), element);
+        for (Element element : document.select(".aditem")) {
+            map = map.put(Long.parseLong(element.attr("data-adid")), element);
         }
         return map;
     }
