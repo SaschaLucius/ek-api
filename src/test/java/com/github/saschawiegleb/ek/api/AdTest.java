@@ -15,7 +15,7 @@ public class AdTest implements DefaultConfiguration {
     public void testAdById() {
         Category category = defaultConfiguration.category(245).get();
         Document document = defaultConfiguration.pageDocument(category, 1).get();
-        Map<Long, Element> listOfElements = QueryUtil.mapOfElements(document);
+        Map<Long, Element> listOfElements = Parser.parseElements(document);
         Tuple2<Long, Element> entry = listOfElements.head();
         Ad ad = Ad.byId(entry._1, entry._2);
         // TODO test
