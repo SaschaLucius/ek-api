@@ -102,6 +102,10 @@ abstract class Configuration {
         return categories().map(cs -> cs.find(c -> c.id() == id).get());
     }
 
+    final Try<URL> globalSearchUrl(String search, int page) {
+        return resolvePath("/s-seite:" + page + "/" + search + "/k0");
+    }
+
     final Try<Document> pageDocument(Category category, int pageNumber) {
         return pageUrl(category, pageNumber, Option.none()).flatMap(url -> Reader.requestDocument(url));
     }
@@ -134,7 +138,7 @@ abstract class Configuration {
 
     final Try<Document> topPageDocument(Category category, int page) {
         return topPageUrl(category, page).flatMap(url -> Reader.requestDocument(url));
-    };
+    }
 
     private final Try<URL> topPageUrl(Category category, int page) {
         StringBuilder path = new StringBuilder();
@@ -147,5 +151,5 @@ abstract class Configuration {
         }
         path.append(add).append("c").append(category.id());
         return Configuration.defaults().resolvePath(path.toString());
-    };
+    }
 }
