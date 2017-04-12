@@ -65,7 +65,7 @@ abstract class Ad {
             }
             if (value.replaceAll(",", "").trim().isEmpty()) {
                 value = "";
-                for (Element e : values.get(i).getElementsByTag("a")) {
+                for (Element e : values.get(i).select("a")) {
                     value += e.ownText() + ",";
                 }
             }
@@ -83,7 +83,7 @@ abstract class Ad {
     private static void setDate(Element adFromList, Builder builder, Document document) {
         try {
             String date = document.select("#viewad-details > section > dl > dd:nth-child(4)").first().ownText();
-            String time[] = adFromList.getElementsByClass("aditem-addon").first().ownText().split(",");
+            String time[] = adFromList.select(".aditem-addon").first().ownText().split(",");
             String timee = time[time.length - 1].trim();
             LocalDateTime dateTime = LocalDateTime.parse(date + " " + timee, new DateTimeFormatterBuilder().appendPattern("dd.MM.yyyy HH:mm").toFormatter());
             builder.time(Either.right(dateTime));

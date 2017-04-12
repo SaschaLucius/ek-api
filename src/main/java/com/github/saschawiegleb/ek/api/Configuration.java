@@ -61,9 +61,9 @@ abstract class Configuration {
     Try<List<Category>> categories() {
         return categoriesDocument().map(doc -> {
             List<Category> cats = List.empty();
-            for (Element element : doc.getElementsByClass("l-row l-container-row").first().getElementsByTag("a")) {
-                String cat[] = element.attr("href").split("/");
 
+            for (Element element : doc.select(".a-span-8 a")) {
+                String cat[] = element.attr("href").split("/");
                 String key = cat[cat.length - 1].substring(1);
                 String value1 = cat[1].substring(2);
                 String value2 = element.ownText();
@@ -85,7 +85,6 @@ abstract class Configuration {
                 if (!value1.equalsIgnoreCase(test) && !test.toLowerCase().contains(value1)) {
                     value2 = value1 + ": " + value2;
                 }
-
                 cats = cats.append(Category.of(Integer.valueOf(key), value2));
             }
             return cats;
