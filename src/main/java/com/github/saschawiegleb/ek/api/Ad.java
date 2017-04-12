@@ -36,24 +36,13 @@ abstract class Ad {
         setImages(builder, doc);
         setDescription(builder, doc);
         setVendor(builder, doc);
-
-        Element details = getDetails(doc);
-        // String price = details.getElementsByAttributeValue("itemprop",
-        // "price").first().attr("content");
-        // String currency = details.getElementsByAttributeValue("itemprop",
-        // "currency").first().attr("content");
-        // details.getElementsByClass("attributelist-striped").first().getElementsByTag("dt")
-        setLocation(builder, details);
-        setDate(element, builder, details);
-        // String id =
-        // details.getElementsByClass("attributelist-striped").first().getElementsByTag("dd").get(2).ownText();
-        // details.getElementsByAttributeValue("itemprop", "price");
-
+        setLocation(builder, doc);
+        setDate(element, builder, doc);
         return builder.build();
     }
 
-    private static Element getDetails(Document document) {
-        return document.getElementById("viewad-details").getElementsByClass("l-container").first();
+    private static Elements getDetails(Document document) {
+        return document.select("#viewad-details > section > dl");
     }
 
     static URL linkById(long id) {
@@ -62,13 +51,13 @@ abstract class Ad {
     }
 
     private static void setCategory(Builder builder, Document document) {
-        String category[] = document.getElementById("vap-brdcrmb").getElementsByClass("breadcrump-link").last().attr("href").split("/");
+        String category[] = document.select("#vap-brdcrmb").first().getElementsByClass("breadcrump-link").last().attr("href").split("/");
         builder.category(category[category.length - 1].substring(1));
     }
 
-    private static void setDate(Element adFromList, Builder builder, Element details) {
+    private static void setDate(Element adFromList, Builder builder, Document document) {
         try {
-            String date = details.getElementsByClass("attributelist-striped").first().getElementsByTag("dd").get(1).ownText();
+            String date = document.select("#viewad-details > section > dl > dd:nth-child(4)").first().ownText();
             String time[] = adFromList.getElementsByClass("aditem-addon").first().ownText().split(",");
             String timee = time[time.length - 1].trim();
             LocalDateTime dateTime = LocalDateTime.parse(date + " " + timee, new DateTimeFormatterBuilder().appendPattern("dd.MM.yyyy HH:mm").toFormatter());
@@ -79,17 +68,17 @@ abstract class Ad {
     }
 
     private static void setDescription(Builder builder, Document document) {
-        builder.description(document.getElementById("viewad-description-text").ownText());
+        builder.description(document.select("#viewad-description-text").first().ownText());
     }
 
     private static void setHeadline(Builder builder, Document document) {
-        Element title = document.getElementById("viewad-title");
+        Element title = document.select("#viewad-title").first();
         builder.headline(title.ownText());
     }
 
     private static void setImages(Builder builder, Document document) {
-        if (document.getElementById("viewad-thumbnails") != null) {
-            Elements elements = document.getElementById("viewad-thumbnails").getElementsByTag("img");
+        if (document.select("#viewad-thumbnails") != null) {
+            Elements elements = document.select("#viewad-thumbnails").first().getElementsByTag("img");
             List<String> images = List.empty();
             for (Element img : elements) {
                 String link = img.attr("data-imgsrc").replaceFirst("_72", "_57");
@@ -99,25 +88,18 @@ abstract class Ad {
         }
     }
 
-    private static void setLocation(Builder builder, Element details) {
-        String ort = details
-            .getElementsByClass("attributelist-striped").first()
-            .getElementsByTag("dd").first()
-            .getElementById("viewad-locality")
-            .ownText();
+    private static void setLocation(Builder builder, Document document) {
+        String ort = document.select("#viewad-locality").first().ownText();
         builder.location(ort);
     }
 
     private static void setPrice(Builder builder, Document document) {
-        Element price = document.getElementById("viewad-price");
-        builder.price(price.ownText());
+        Element price = document.select("#viewad-price").first();
+        builder.price(price.ownText().replaceAll("Preis: ", ""));
     }
 
     private static void setVendor(Builder builder, Document document) {
-        Element link = document
-            .getElementById("viewad-contact")
-            .getElementsByClass("iconlist-text").first()
-            .getElementsByTag("a").first();
+        Element link = document.select("#viewad-contact > div > ul > li:nth-child(1) > span > span.text-bold.text-bigger.text-force-linebreak > a").first();
         builder.vendorId(link.attr("href").replaceAll("/s-bestandsliste\\.html\\?userId=", ""));
         builder.vendorName(link.ownText());
     }
