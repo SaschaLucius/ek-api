@@ -63,7 +63,7 @@ abstract class Ad {
 
     @Default
     Either<Throwable, LocalDateTime> time() {
-        return Either.left(new NoSuchElementException("No time set"));
+        return Either.left(new NoSuchElementException("no time set"));
     }
 
     @Default
