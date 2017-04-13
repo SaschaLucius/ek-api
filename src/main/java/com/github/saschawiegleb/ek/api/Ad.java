@@ -21,8 +21,8 @@ abstract class Ad {
     }
 
     @Default
-    String category() {
-        return "";
+    Category category() {
+        return Category.of(0, "All");
     }
 
     @Default

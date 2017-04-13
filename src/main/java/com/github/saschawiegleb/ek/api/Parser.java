@@ -4,6 +4,7 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Objects;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,41 +19,17 @@ import javaslang.collection.Seq;
 import javaslang.control.Either;
 
 final class Parser {
+    private final Configuration configuration;
 
-    static Seq<Ad> ads(Document document) {
-        Map<Long, Element> elementsById = parseElements(document);
-        return elementsById.map(entry -> byId(entry._1, entry._2));
+    private Parser(Configuration configuration) {
+        this.configuration = Objects.requireNonNull(configuration);
     }
 
-    static Ad byId(long id, Element element) {
-        ImmutableAd.Builder builder = ImmutableAd.builder();
-        builder.id(id);
-        // TODO side effect, must be removed
-        Document doc = Reader.requestDocument(linkById(id)).get();
-
-        if (doc.getElementById("viewad-adexpired") != null || doc.getElementById("home") != null) {
-            builder.headline("no longer available");
-            return builder.build();
-        }
-
-        setCategory(builder, doc);
-        setHeadline(builder, doc);
-        setPrice(builder, doc);
-        setImages(builder, doc);
-        setDescription(builder, doc);
-        setVendor(builder, doc);
-        setLocation(builder, doc);
-        builder.time(time(element));
-        setAdditionslDetails(builder, doc);
-        return builder.build();
+    static Parser of(Configuration configuration) {
+        return new Parser(configuration);
     }
 
-    private static URL linkById(long id) {
-        // TODO side effect, must be remove
-        return Configuration.defaults().resolvePath("s-anzeige/" + id).get();
-    }
-
-    public static Map<Long, Element> parseElements(Document document) {
+    static Map<Long, Element> parseElements(Document document) {
         Map<Long, Element> map = HashMap.empty();
         for (Element element : document.select(".aditem")) {
             map = map.put(Long.parseLong(element.attr("data-adid")), element);
@@ -83,11 +60,6 @@ final class Parser {
             details.put(key, !value.isEmpty() ? value : values.get(i).child(0).ownText());
         }
         builder.additionalDetails(details);
-    }
-
-    private static void setCategory(Builder builder, Document document) {
-        String category[] = document.select("#vap-brdcrmb > a:nth-last-child(1)").first().attr("href").split("/");
-        builder.category(category[category.length - 1].substring(1));
     }
 
     private static void setDescription(Builder builder, Document document) {
@@ -124,7 +96,7 @@ final class Parser {
         builder.vendorName(link.ownText());
     }
 
-    static Either<Throwable, LocalDateTime> time(Element adFromList) {
+    private static Either<Throwable, LocalDateTime> time(Element adFromList) {
         try {
             List<String> time = List.of(adFromList.select(".aditem-addon").first().ownText().split(","));
             LocalDateTime dateTime;
@@ -141,6 +113,44 @@ final class Parser {
         } catch (RuntimeException e) {
             return Either.left(e);
         }
+    }
+
+    Seq<Ad> ads(Document document) {
+        Map<Long, Element> elementsById = parseElements(document);
+        return elementsById.map(entry -> readAd(entry._1, entry._2));
+    }
+
+    private URL linkById(long id) {
+        return configuration.resolvePath("s-anzeige/" + id).get();
+    }
+
+    Ad readAd(long id, Element element) {
+        ImmutableAd.Builder builder = ImmutableAd.builder();
+        builder.id(id);
+        // TODO side effect, must be removed
+        Document doc = Reader.requestDocument(linkById(id)).get();
+
+        if (doc.getElementById("viewad-adexpired") != null || doc.getElementById("home") != null) {
+            builder.headline("no longer available");
+            return builder.build();
+        }
+
+        setCategory(builder, doc);
+        setHeadline(builder, doc);
+        setPrice(builder, doc);
+        setImages(builder, doc);
+        setDescription(builder, doc);
+        setVendor(builder, doc);
+        setLocation(builder, doc);
+        builder.time(time(element));
+        setAdditionslDetails(builder, doc);
+        return builder.build();
+    }
+
+    private void setCategory(Builder builder, Document document) {
+        String category[] = document.select("#vap-brdcrmb > a:nth-last-child(1)").first().attr("href").split("/");
+        int id = Integer.parseInt(category[category.length - 1].substring(1));
+        builder.category(configuration.category(id).get());
     }
 
 }

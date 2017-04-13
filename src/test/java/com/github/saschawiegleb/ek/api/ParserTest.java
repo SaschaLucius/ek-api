@@ -13,7 +13,7 @@ public class ParserTest implements DefaultConfiguration {
     public void ads_pageDocument() {
         Category category = defaultConfiguration.category(245).get();
         Document document = defaultConfiguration.pageDocument(category, 1).get();
-        Seq<Ad> ads = Parser.ads(document);
+        Seq<Ad> ads = Parser.of(defaultConfiguration).ads(document);
         assertThat(ads).hasSize(27);
     }
 
@@ -21,7 +21,7 @@ public class ParserTest implements DefaultConfiguration {
     public void ads_topPageDocument() {
         Category category = defaultConfiguration.category(245).get();
         Document document = defaultConfiguration.topPageDocument(category, 1).get();
-        Seq<Ad> ads = Parser.ads(document);
+        Seq<Ad> ads = Parser.of(defaultConfiguration).ads(document);
         assertThat(ads.size()).isGreaterThan(0);
     }
 }
