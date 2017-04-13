@@ -2,20 +2,28 @@ package com.github.saschawiegleb.ek.api;
 
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 
+import javaslang.collection.HashMap;
+import javaslang.collection.List;
 import javaslang.collection.Map;
-import javaslang.collection.Seq;
 import javaslang.control.Either;
 
 @Immutable
 abstract class Ad {
 
-    abstract Map<String, String> additionalDetails();
+    @Default
+    Map<String, String> additionalDetails() {
+        return HashMap.empty();
+    }
 
-    abstract String category();
+    @Default
+    String category() {
+        return "";
+    }
 
     @Default
     String description() {
@@ -29,24 +37,42 @@ abstract class Ad {
 
     abstract long id();
 
-    abstract Seq<String> images();
+    @Default
+    List<String> images() {
+        return List.empty();
+    }
 
     final URL link() {
         // TODO side effect, must be removed
         return Configuration.defaults().resolvePath("s-anzeige/" + id()).get();
     }
 
-    abstract String location();
+    @Default
+    String location() {
+        return "";
+    }
 
-    abstract String price();
+    @Default
+    String price() {
+        return "";
+    }
 
     final String searchString() {
         return headline().toLowerCase() + " " + description().toLowerCase();
     }
 
-    abstract Either<Throwable, LocalDateTime> time();
+    @Default
+    Either<Throwable, LocalDateTime> time() {
+        return Either.left(new NoSuchElementException("No time set"));
+    }
 
-    abstract String vendorId();
+    @Default
+    String vendorId() {
+        return "";
+    }
 
-    abstract String vendorName();
+    @Default
+    String vendorName() {
+        return "";
+    }
 }
