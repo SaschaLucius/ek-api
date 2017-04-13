@@ -120,6 +120,10 @@ final class Parser {
         return elementsById.map(entry -> readAd(entry._1, entry._2));
     }
 
+    private boolean isAvailable(Document doc) {
+        return doc.getElementById("viewad-adexpired") == null && doc.getElementById("home") == null;
+    }
+
     private URL linkById(long id) {
         return configuration.resolvePath("s-anzeige/" + id).get();
     }
@@ -130,7 +134,7 @@ final class Parser {
         // TODO side effect, must be removed
         Document doc = Reader.requestDocument(linkById(id)).get();
 
-        if (doc.getElementById("viewad-adexpired") != null || doc.getElementById("home") != null) {
+        if (!isAvailable(doc)) {
             builder.headline("no longer available");
             return builder.build();
         }
