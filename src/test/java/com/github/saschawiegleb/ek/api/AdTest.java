@@ -17,7 +17,7 @@ public class AdTest implements DefaultConfiguration {
         Document document = defaultConfiguration.pageDocument(category, 1).get();
         Map<Long, Element> listOfElements = Parser.parseElements(document);
         Tuple2<Long, Element> entry = listOfElements.head();
-        Ad ad = Ad.byId(entry._1, entry._2);
+        Ad ad = Parser.byId(entry._1, entry._2);
         // TODO test
     }
 
@@ -27,13 +27,13 @@ public class AdTest implements DefaultConfiguration {
         Document document = defaultConfiguration.pageDocument(category, 1).get();
         Map<Long, Element> listOfElements = Parser.parseElements(document);
         Tuple2<Long, Element> entry = listOfElements.head();
-        Ad ad = Ad.byId(entry._1, entry._2);
+        Ad ad = Parser.byId(entry._1, entry._2);
         // TODO test
     }
 
     @Test
     public void testAdByIdExpired() {
-        Ad ad = Ad.byId(428021741L, null);
+        Ad ad = Parser.byId(428021741L, null);
         assertThat(ad.toString()).startsWith("Ad [headline=Artikel bereits verkauft., id=428021741, getLink()=");
     }
 
