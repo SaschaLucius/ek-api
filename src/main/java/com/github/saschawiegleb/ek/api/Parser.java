@@ -1,8 +1,9 @@
 package com.github.saschawiegleb.ek.api;
 
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatterBuilder;
+import java.time.LocalTime;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -41,7 +42,7 @@ final class Parser {
         setDescription(builder, doc);
         setVendor(builder, doc);
         setLocation(builder, doc);
-        setDate(element, builder, doc);
+        builder.time(time(element));
         setAdditionslDetails(builder, doc);
         return builder.build();
     }
@@ -52,7 +53,7 @@ final class Parser {
     }
 
     public static Map<Long, Element> parseElements(Document document) {
-        HashMap<Long, Element> map = HashMap.empty();
+        Map<Long, Element> map = HashMap.empty();
         for (Element element : document.select(".aditem")) {
             map = map.put(Long.parseLong(element.attr("data-adid")), element);
         }
@@ -89,18 +90,6 @@ final class Parser {
         builder.category(category[category.length - 1].substring(1));
     }
 
-    private static void setDate(Element adFromList, Builder builder, Document document) {
-        try {
-            String date = document.select("#viewad-details > section > dl > dd:nth-child(4)").first().ownText();
-            String time[] = adFromList.select(".aditem-addon").first().ownText().split(",");
-            String timee = time[time.length - 1].trim();
-            LocalDateTime dateTime = LocalDateTime.parse(date + " " + timee, new DateTimeFormatterBuilder().appendPattern("dd.MM.yyyy HH:mm").toFormatter());
-            builder.time(Either.right(dateTime));
-        } catch (Exception e) {
-            builder.time(Either.left(e));
-        }
-    }
-
     private static void setDescription(Builder builder, Document document) {
         builder.description(document.select("#viewad-description-text").first().ownText());
     }
@@ -133,6 +122,25 @@ final class Parser {
         Element link = document.select("#viewad-contact > div > ul > li:nth-child(1) > span > span.text-bold.text-bigger.text-force-linebreak > a").first();
         builder.vendorId(link.attr("href").replaceAll("/s-bestandsliste\\.html\\?userId=", ""));
         builder.vendorName(link.ownText());
+    }
+
+    static Either<Throwable, LocalDateTime> time(Element adFromList) {
+        try {
+            List<String> time = List.of(adFromList.select(".aditem-addon").first().ownText().split(","));
+            LocalDateTime dateTime;
+            if (time.head().equals("Heute")) {
+                LocalTime t = LocalTime.parse(time.tail().head().trim());
+                dateTime = t.atDate(LocalDate.now());
+            } else if (time.head().equals("Gestern")) {
+                LocalTime t = LocalTime.parse(time.tail().head().trim());
+                dateTime = t.atDate(LocalDate.now().minusDays(1));
+            } else {
+                dateTime = LocalDate.parse(time.head().trim()).atStartOfDay();
+            }
+            return Either.right(dateTime);
+        } catch (RuntimeException e) {
+            return Either.left(e);
+        }
     }
 
 }
