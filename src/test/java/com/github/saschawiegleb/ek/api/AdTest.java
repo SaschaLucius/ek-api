@@ -2,12 +2,14 @@ package com.github.saschawiegleb.ek.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDateTime;
+
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.junit.Test;
 
 import javaslang.Tuple2;
 import javaslang.collection.Map;
+import javaslang.control.Either;
 
 public class AdTest implements DefaultConfiguration {
 
@@ -15,9 +17,10 @@ public class AdTest implements DefaultConfiguration {
     public void testAdById() {
         Category category = defaultConfiguration.category(245).get();
         Document document = defaultConfiguration.pageDocument(category, 1).get();
-        Map<Long, Element> listOfElements = Parser.parseElements(document);
-        Tuple2<Long, Element> entry = listOfElements.head();
+        Map<Long, Either<String, LocalDateTime>> listOfElements = Parser.parseAdEntries(document);
+        Tuple2<Long, Either<String, LocalDateTime>> entry = listOfElements.head();
         Ad ad = Parser.of(defaultConfiguration).readAd(entry._1, entry._2);
+        System.err.println(ad);
         // TODO test
     }
 
@@ -25,15 +28,16 @@ public class AdTest implements DefaultConfiguration {
     public void testAdByIdAdditionalDetails() {
         Category category = defaultConfiguration.category(216).get();
         Document document = defaultConfiguration.pageDocument(category, 1).get();
-        Map<Long, Element> listOfElements = Parser.parseElements(document);
-        Tuple2<Long, Element> entry = listOfElements.head();
+        Map<Long, Either<String, LocalDateTime>> listOfElements = Parser.parseAdEntries(document);
+        Tuple2<Long, Either<String, LocalDateTime>> entry = listOfElements.head();
         Ad ad = Parser.of(defaultConfiguration).readAd(entry._1, entry._2);
+        System.err.println(ad);
         // TODO test
     }
 
     @Test
     public void testAdByIdExpired() {
-        Ad ad = Parser.of(defaultConfiguration).readAd(428021741L, null);
+        Ad ad = Parser.of(defaultConfiguration).readAd(428021741L, Either.left("no time set"));
         assertThat(ad).isEqualTo(ImmutableAd.builder().id(428021741L).headline("no longer available").build());
     }
 

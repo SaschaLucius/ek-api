@@ -29,10 +29,12 @@ final class Parser {
         return new Parser(configuration);
     }
 
-    static Map<Long, Element> parseElements(Document document) {
-        Map<Long, Element> map = HashMap.empty();
+    static Map<Long, Either<String, LocalDateTime>> parseAdEntries(Document document) {
+        Map<Long, Either<String, LocalDateTime>> map = HashMap.empty();
         for (Element element : document.select(".aditem")) {
-            map = map.put(Long.parseLong(element.attr("data-adid")), element);
+            long id = Long.parseLong(element.attr("data-adid"));
+            Either<String, LocalDateTime> time = time(element);
+            map = map.put(id, time);
         }
         return map;
     }
@@ -96,9 +98,9 @@ final class Parser {
         builder.vendorName(link.ownText());
     }
 
-    private static Either<Throwable, LocalDateTime> time(Element adFromList) {
+    private static Either<String, LocalDateTime> time(Element element) {
         try {
-            List<String> time = List.of(adFromList.select(".aditem-addon").first().ownText().split(","));
+            List<String> time = List.of(element.select(".aditem-addon").first().ownText().split(","));
             LocalDateTime dateTime;
             if (time.head().equals("Heute")) {
                 LocalTime t = LocalTime.parse(time.tail().head().trim());
@@ -111,12 +113,12 @@ final class Parser {
             }
             return Either.right(dateTime);
         } catch (RuntimeException e) {
-            return Either.left(e);
+            return Either.left(e.getMessage());
         }
     }
 
     Seq<Ad> ads(Document document) {
-        Map<Long, Element> elementsById = parseElements(document);
+        Map<Long, Either<String, LocalDateTime>> elementsById = parseAdEntries(document);
         return elementsById.map(entry -> readAd(entry._1, entry._2));
     }
 
@@ -128,9 +130,10 @@ final class Parser {
         return configuration.resolvePath("s-anzeige/" + id).get();
     }
 
-    Ad readAd(long id, Element element) {
+    Ad readAd(long id, Either<String, LocalDateTime> time) {
         ImmutableAd.Builder builder = ImmutableAd.builder();
         builder.id(id);
+        builder.time(time);
         // TODO side effect, must be removed
         Document doc = Reader.requestDocument(linkById(id)).get();
 
@@ -146,7 +149,6 @@ final class Parser {
         setDescription(builder, doc);
         setVendor(builder, doc);
         setLocation(builder, doc);
-        builder.time(time(element));
         setAdditionslDetails(builder, doc);
         return builder.build();
     }

@@ -2,7 +2,6 @@ package com.github.saschawiegleb.ek.api;
 
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
@@ -62,8 +61,8 @@ abstract class Ad {
     }
 
     @Default
-    Either<Throwable, LocalDateTime> time() {
-        return Either.left(new NoSuchElementException("no time set"));
+    Either<String, LocalDateTime> time() {
+        return Either.left("no time set");
     }
 
     @Default
