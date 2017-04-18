@@ -81,7 +81,7 @@ final class Parser {
                     value += e.ownText() + ",";
                 }
             }
-            details.put(key, !value.isEmpty() ? value : values.get(i).child(0).ownText());
+            details = details.put(key, !value.isEmpty() ? value : values.get(i).child(0).ownText());
         }
         builder.additionalDetails(details);
     }
@@ -135,6 +135,7 @@ final class Parser {
 
     private static Either<String, LocalDateTime> time(Element element) {
         try {
+            // not available in TopAds
             List<String> time = List.of(element.select(".aditem-addon").first().ownText().split(","));
             LocalDateTime dateTime;
             if (time.head().equals("Heute")) {

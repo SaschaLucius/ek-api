@@ -51,7 +51,7 @@ public class AdTest implements DefaultConfiguration {
         long y = 634606820L;
         Random r = new Random();
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 50; i++) {
             long number = x + (long) (r.nextDouble() * (y - x));
             Ad ad = Parser.of(defaultConfiguration).readAd(number, Either.left("no time set"));
             ads.add(ad);
@@ -59,7 +59,7 @@ public class AdTest implements DefaultConfiguration {
 
         List<Ad> availebleAds = new ArrayList<>();
         for (Ad ad : ads) {
-            if (!ad.headline().isEmpty()) {
+            if (!ad.headline().equals("no longer available")) {
                 availebleAds.add(ad);
             }
         }
