@@ -3,6 +3,7 @@ package com.github.saschawiegleb.ek.api;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Lazy;
 import org.jsoup.nodes.Document;
@@ -133,6 +134,11 @@ abstract class Configuration {
 
     final Try<URL> resolvePath(String path) {
         return Try.of(() -> new URL(baseUrl(), path));
+    }
+
+    @Default
+    Selector selector() {
+        return Selector.of();
     }
 
     final Try<Document> topPageDocument(Category category, int page) {

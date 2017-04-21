@@ -33,16 +33,6 @@ final class Parser {
         return new Parser(configuration);
     }
 
-    static Map<Long, Either<String, LocalDateTime>> parseAdEntries(Document document) {
-        Map<Long, Either<String, LocalDateTime>> map = HashMap.empty();
-        for (Element element : document.select(".aditem")) {
-            long id = Long.parseLong(element.attr("data-adid"));
-            Either<String, LocalDateTime> time = time(element);
-            map = map.put(id, time);
-        }
-        return map;
-    }
-
     private static Elements selectAll(Element element, String selector) {
         if (element != null && selector != null) {
             Elements elements = element.select(selector);
@@ -171,6 +161,16 @@ final class Parser {
             return configuration.resolvePath(id).get();
         }
         return configuration.resolvePath("s-bestandsliste.html?userId=" + id).get();
+    }
+
+    Map<Long, Either<String, LocalDateTime>> parseAdEntries(Document document) {
+        Map<Long, Either<String, LocalDateTime>> map = HashMap.empty();
+        for (Element element : document.select(configuration.selector().adEntryElement())) {
+            long id = Long.parseLong(element.attr(configuration.selector().adEntryId()));
+            Either<String, LocalDateTime> time = time(element);
+            map = map.put(id, time);
+        }
+        return map;
     }
 
     Ad readAd(long id, Either<String, LocalDateTime> time) {
