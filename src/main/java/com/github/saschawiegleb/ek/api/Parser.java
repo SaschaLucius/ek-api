@@ -51,9 +51,75 @@ final class Parser {
         return defaultElement;
     }
 
-    private static void setAdditionslDetails(Builder builder, Document document) {
-        Elements keys = selectAll(document, "#viewad-details > section > dl dt");
-        Elements values = selectAll(document, "#viewad-details > section > dl dd");
+    Seq<Ad> ads(Document adList) {
+        Map<Long, Either<String, LocalDateTime>> elementsById = parseAdEntries(adList);
+        return elementsById.map(entry -> readAd(entry._1, entry._2));
+    }
+
+    private boolean isAvailable(Document adPage) {
+        return adPage.select(configuration.selector().adPageExpiredMessage()).isEmpty() && adPage.select(configuration.selector().homeContent()).isEmpty();
+    }
+
+    private URL linkById(long id) {
+        return configuration.resolvePath("s-anzeige/" + id).get();
+    }
+
+    private URL linkByUserId(String id) {
+        if (id.contains("shop")) {
+            return configuration.resolvePath(id).get();
+        }
+        return configuration.resolvePath("s-bestandsliste.html?userId=" + id).get();
+    }
+
+    Map<Long, Either<String, LocalDateTime>> parseAdEntries(Document adList) {
+        Map<Long, Either<String, LocalDateTime>> map = HashMap.empty();
+        for (Element adListEntry : adList.select(configuration.selector().adListEntryElement())) {
+            long id = Long.parseLong(adListEntry.attr(configuration.selector().adListEntryId()));
+            Either<String, LocalDateTime> time = time(adListEntry);
+            map = map.put(id, time);
+        }
+        return map;
+    }
+
+    Ad readAd(long id, Either<String, LocalDateTime> time) {
+        ImmutableAd.Builder builder = ImmutableAd.builder();
+        builder.id(id);
+        builder.time(time);
+        // TODO side effect, must be removed
+        Document adPage = Reader.requestDocument(linkById(id)).get();
+        if (!isAvailable(adPage)) {
+            builder.headline("no longer available");
+            return builder.build();
+        }
+
+        setCategory(builder, adPage);
+        setHeadline(builder, adPage);
+        setPrice(builder, adPage);
+        setImages(builder, adPage);
+        setDescription(builder, adPage);
+        setVendor(builder, adPage);
+        setLocation(builder, adPage);
+        setAdditionalDetails(builder, adPage);
+        return builder.build();
+    }
+
+    Ad readAdSmall(long id, Either<String, LocalDateTime> time, Element adListEntry) {
+        ImmutableAd.Builder builder = ImmutableAd.builder();
+        builder.id(id);
+        builder.time(time);
+        builder.headline(selectFirst(adListEntry, configuration.selector().adListEntryHeadline()).ownText());
+        builder.description(selectFirst(adListEntry, configuration.selector().adListEntryDescription()).ownText());
+        builder.price(selectFirst(adListEntry, configuration.selector().adListEntryPrice()).ownText());
+        builder.location(selectFirst(adListEntry, configuration.selector().adListEntryLocation()).ownText());
+        builder.time(time(adListEntry));
+        // String img = selectFirst(adListEntry, "article > section.aditem-image
+        // > div > img").attr("data-imgsrc");
+        return builder.build();
+    }
+
+    private void setAdditionalDetails(Builder builder, Document adPage) {
+        Elements keys = selectAll(adPage, configuration.selector().adPageAdditionalDetailsKeys());
+        Elements values = selectAll(adPage, configuration.selector().adPageAdditionalDetailsValues());
 
         Map<String, String> details = HashMap.empty();
         for (int i = 3; i < keys.size(); i++) {
@@ -67,8 +133,8 @@ final class Parser {
             }
             if (value.replaceAll(",", "").trim().isEmpty()) {
                 value = "";
-                for (Element e : selectAll(values.get(i), "a")) {
-                    value += e.ownText() + ",";
+                for (Element listEntry : selectAll(values.get(i), "a")) {
+                    value += listEntry.ownText() + ",";
                 }
             }
             details = details.put(key, !value.isEmpty() ? value : values.get(i).child(0).ownText());
@@ -76,45 +142,52 @@ final class Parser {
         builder.additionalDetails(details);
     }
 
-    private static void setDescription(Builder builder, Document document) {
-        builder.description(selectFirst(document, "#viewad-description-text").ownText());
-    }
-
-    private static void setHeadline(Builder builder, Document document) {
-        builder.headline(selectFirst(document, "#viewad-title").ownText());
-    }
-
-    private static void setImages(Builder builder, Document document) {
-        if (!selectFirst(document, "#viewad-thumbnails").equals(defaultElement)) {
-            Elements elements = selectAll(document, "#viewad-thumbnail-list img");
-            List<String> images = List.empty();
-            for (Element img : elements) {
-                String link = img.attr("data-imgsrc").replaceFirst("_72", "_57");
-                images = images.append(link);
-            }
-            builder.images(images);
+    private void setCategory(Builder builder, Document adPage) {
+        String category[] = selectFirst(adPage, configuration.selector().adPageCategory()).attr(configuration.selector().adPageCategoryLinkAttribute()).split("/");
+        if (category.length > 0 && !category[category.length - 1].isEmpty()) {
+            int id = Integer.parseInt(category[category.length - 1].substring(1));
+            builder.category(configuration.category(id).get());
         }
     }
 
-    private static void setLocation(Builder builder, Document document) {
-        builder.location(selectFirst(document, "#viewad-locality").ownText());
+    private void setDescription(Builder builder, Document adPage) {
+        builder.description(selectFirst(adPage, configuration.selector().adPageDescription()).ownText());
     }
 
-    private static void setPrice(Builder builder, Document document) {
+    private void setHeadline(Builder builder, Document adPage) {
+        builder.headline(selectFirst(adPage, configuration.selector().adPageHeadline()).ownText());
+    }
 
-        Element element = selectFirst(document, "#viewad-price");
-        if (!element.equals(defaultElement)) {
-            builder.price(element.ownText().replaceAll("Preis: ", ""));
+    private void setImages(Builder builder, Document adPage) {
+        if (!selectFirst(adPage, configuration.selector().adPageImagesAvailable()).equals(defaultElement)) {
+            Elements images = selectAll(adPage, configuration.selector().adPageImages());
+            List<String> imageLinks = List.empty();
+            for (Element img : images) {
+                String link = img.attr(configuration.selector().adPageImagesLinkAttribute()).replaceFirst("_72", "_57");
+                imageLinks = imageLinks.append(link);
+            }
+            builder.images(imageLinks);
+        }
+    }
+
+    private void setLocation(Builder builder, Document adPage) {
+        builder.location(selectFirst(adPage, configuration.selector().adPageLocation()).ownText());
+    }
+
+    private void setPrice(Builder builder, Document adPage) {
+        Element price = selectFirst(adPage, configuration.selector().adPagePrice());
+        if (!price.equals(defaultElement)) {
+            builder.price(price.ownText().replaceAll("Preis: ", ""));
             return;
         }
 
-        String category = selectFirst(document, "#viewad-main > meta").attr("content");
+        String category = selectFirst(adPage, "#viewad-main > meta").attr("content");
         if (category.equals("Tauschen") || category.equals("Zu verschenken") || category.equals("Verleihen")) {
             builder.price(category);
             return;
         }
 
-        String jobs = selectFirst(document, "#vap-brdcrmb > a:nth-child(2) > span").ownText();
+        String jobs = selectFirst(adPage, "#vap-brdcrmb > a:nth-child(2) > span").ownText();
         if (jobs.equals("Jobs")) {
             builder.price("job");
             return;
@@ -123,10 +196,40 @@ final class Parser {
         builder.price("unknown");
     }
 
-    private static Either<String, LocalDateTime> time(Element element) {
+    private void setVendor(Builder builder, Document adPage) {
+        Element userPageLink = selectFirst(adPage, configuration.selector().adPageVendor());
+        if (!userPageLink.equals(defaultElement)) {
+            builder.vendorId(userPageLink.attr(configuration.selector().adPageVendorLinkAttribute()).replaceAll("/s-bestandsliste\\.html\\?userId=", ""));
+            builder.vendorName(userPageLink.ownText());
+            return;
+        }
+        userPageLink = selectFirst(adPage, configuration.selector().adPageVendorOtherAds());
+        if (!userPageLink.equals(defaultElement)) {
+            String id = userPageLink.attr(configuration.selector().adPageVendorLinkAttribute()).replaceAll("/s-bestandsliste\\.html\\?userId=", "");
+            builder.vendorId(id);
+            // TODO side effect, must be removed
+            Document userPage = Reader.requestDocument(linkByUserId(id)).get();
+            Element user = selectFirst(userPage, configuration.selector().userPageUsername());
+            builder.vendorName(user.ownText());
+            return;
+        }
+        userPageLink = selectFirst(adPage, configuration.selector().adPageVendorShopOtherAds());
+        if (!userPageLink.equals(defaultElement)) {
+            String id = userPageLink.attr(configuration.selector().adPageVendorLinkAttribute()).replaceAll("/s-bestandsliste\\.html\\?userId=", "");
+            builder.vendorId(id);
+            // TODO side effect, must be removed
+            Document userPage = Reader.requestDocument(linkByUserId(id)).get();
+            Element user = selectFirst(userPage, configuration.selector().userPageShopName());
+            builder.vendorName(user.ownText().trim());
+            return;
+        }
+        System.out.println(adPage.baseUri());
+    }
+
+    private Either<String, LocalDateTime> time(Element adListEntry) {
         try {
             // not available in TopAds
-            List<String> time = List.of(element.select(".aditem-addon").first().ownText().split(","));
+            List<String> time = List.of(adListEntry.select(configuration.selector().adListEntryTime()).first().ownText().split(","));
             LocalDateTime dateTime;
             if (time.head().equals("Heute")) {
                 LocalTime t = LocalTime.parse(time.tail().head().trim());
@@ -141,99 +244,6 @@ final class Parser {
         } catch (RuntimeException e) {
             return Either.left(e.getMessage());
         }
-    }
-
-    Seq<Ad> ads(Document document) {
-        Map<Long, Either<String, LocalDateTime>> elementsById = parseAdEntries(document);
-        return elementsById.map(entry -> readAd(entry._1, entry._2));
-    }
-
-    private boolean isAvailable(Document doc) {
-        return doc.getElementById("viewad-adexpired") == null && doc.getElementById("home") == null;
-    }
-
-    private URL linkById(long id) {
-        return configuration.resolvePath("s-anzeige/" + id).get();
-    }
-
-    private URL linkByUserId(String id) {
-        if (id.contains("shop")) {
-            return configuration.resolvePath(id).get();
-        }
-        return configuration.resolvePath("s-bestandsliste.html?userId=" + id).get();
-    }
-
-    Map<Long, Either<String, LocalDateTime>> parseAdEntries(Document document) {
-        Map<Long, Either<String, LocalDateTime>> map = HashMap.empty();
-        for (Element element : document.select(configuration.selector().adEntryElement())) {
-            long id = Long.parseLong(element.attr(configuration.selector().adEntryId()));
-            Either<String, LocalDateTime> time = time(element);
-            map = map.put(id, time);
-        }
-        return map;
-    }
-
-    Ad readAd(long id, Either<String, LocalDateTime> time) {
-        ImmutableAd.Builder builder = ImmutableAd.builder();
-        builder.id(id);
-        builder.time(time);
-        // TODO side effect, must be removed
-        Document doc = Reader.requestDocument(linkById(id)).get();
-        if (!isAvailable(doc)) {
-            builder.headline("no longer available");
-            return builder.build();
-        }
-
-        setCategory(builder, doc);
-        setHeadline(builder, doc);
-        setPrice(builder, doc);
-        setImages(builder, doc);
-        setDescription(builder, doc);
-        setVendor(builder, doc);
-        setLocation(builder, doc);
-        setAdditionslDetails(builder, doc);
-        return builder.build();
-    }
-
-    Ad readAdSmall(long id, Either<String, LocalDateTime> time, Element element) {
-        ImmutableAd.Builder builder = ImmutableAd.builder();
-        builder.id(id);
-        builder.time(time);
-        builder.headline(selectFirst(element, "article > section.aditem-main > h2 > a").ownText());
-        builder.description(selectFirst(element, "article > section.aditem-main > p:nth-child(2)").ownText());
-        builder.price(selectFirst(element, "article > section.aditem-details > strong").ownText());
-        builder.location(selectFirst(element, "article > section.aditem-details").ownText());
-        builder.time(time(element));
-        // String img = selectFirst(element, "article > section.aditem-image
-        // > div > img").attr("data-imgsrc");
-        return builder.build();
-    }
-
-    private void setCategory(Builder builder, Document document) {
-        String category[] = selectFirst(document, "#vap-brdcrmb > a:nth-last-child(1)").attr("href").split("/");
-        if (category.length > 0 && !category[category.length - 1].isEmpty()) {
-            int id = Integer.parseInt(category[category.length - 1].substring(1));
-            builder.category(configuration.category(id).get());
-        }
-    }
-
-    private void setVendor(Builder builder, Document document) {
-        Element link = selectFirst(document, "#viewad-contact > div > ul > li:nth-child(1) > span > span.text-bold.text-bigger.text-force-linebreak > a");
-        if (!link.equals(defaultElement)) {
-            builder.vendorId(link.attr("href").replaceAll("/s-bestandsliste\\.html\\?userId=", ""));
-            builder.vendorName(link.ownText());
-            return;
-        }
-        link = selectFirst(document, "#poster-other-ads-link");
-        if (!link.equals(defaultElement)) {
-            String id = link.attr("href").replaceAll("/s-bestandsliste\\.html\\?userId=", "");
-            builder.vendorId(id);
-            Document userPage = Reader.requestDocument(linkByUserId(id)).get();
-            Element user = selectFirst(userPage, "#site-content > div.l-splitpage > div.l-splitpage-navigation > section > header > h2");
-            builder.vendorName(user.ownText());
-            return;
-        }
-        System.out.println(document.baseUri());
     }
 
 }
