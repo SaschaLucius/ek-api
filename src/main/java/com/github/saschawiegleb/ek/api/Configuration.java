@@ -14,7 +14,7 @@ import javaslang.control.Option;
 import javaslang.control.Try;
 
 @Immutable
-abstract class Configuration {
+public abstract class Configuration {
 
     private static final String baseUrl = new String(new byte[] {
         104, 116, 116, 112, 115, 58, 47, 47,
@@ -32,11 +32,11 @@ abstract class Configuration {
 
     private static final int pageLimit = 50;
 
-    static Configuration defaults() {
+    public static Configuration defaults() {
         return of(baseUrl, pageLimit);
     }
 
-    static Configuration of(String baseUrl, int pagelimit) {
+    public static Configuration of(String baseUrl, int pagelimit) {
         try {
             return of(new URL(baseUrl), pagelimit);
         } catch (MalformedURLException e) {
@@ -63,7 +63,7 @@ abstract class Configuration {
     abstract URL baseUrl();
 
     @Lazy
-    Try<List<Category>> categories() {
+    public Try<List<Category>> categories() {
         return categoriesDocument().map(doc -> {
             List<Category> cats = List.empty();
 
@@ -106,16 +106,20 @@ abstract class Configuration {
         return categories().map(cs -> cs.find(c -> c.id() == id).get());
     }
 
-    final Try<URL> globalSearchUrl(String search, int page) {
+    public final Try<URL> globalSearchUrl(String search, int page) {
         return resolvePath("/s-seite:" + page + "/" + search + "/k0");
     }
 
-    final Try<Document> pageDocument(Category category, int pageNumber) {
-        return pageUrl(category, pageNumber, Option.none()).flatMap(url -> Reader.requestDocument(url));
+    public final Try<Document> pageDocument(Category category, int pageNumber) {
+        return pageDocument(category, pageNumber, Option.none());
     }
 
-    final Try<Document> pageDocument(Category category, int pageNumber, String searchString) {
-        return pageUrl(category, pageNumber, Option.of(searchString)).flatMap(url -> Reader.requestDocument(url));
+    public final Try<Document> pageDocument(Category category, int pageNumber, Option<String> searchString) {
+        return pageUrl(category, pageNumber, searchString).flatMap(url -> Reader.requestDocument(url));
+    }
+
+    public final Try<Document> pageDocument(Category category, int pageNumber, String searchString) {
+        return pageDocument(category, pageNumber, Option.of(searchString));
     }
 
     abstract int pageLimit();
@@ -136,7 +140,7 @@ abstract class Configuration {
         return resolvePath(path.toString());
     }
 
-    final Try<URL> resolvePath(String path) {
+    public final Try<URL> resolvePath(String path) {
         return Try.of(() -> new URL(baseUrl(), path));
     }
 
@@ -145,7 +149,7 @@ abstract class Configuration {
         return Selector.of();
     }
 
-    final Try<Document> topPageDocument(Category category, int page) {
+    public final Try<Document> topPageDocument(Category category, int page) {
         return topPageUrl(category, page).flatMap(url -> Reader.requestDocument(url));
     }
 

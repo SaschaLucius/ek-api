@@ -12,65 +12,65 @@ import javaslang.collection.Map;
 import javaslang.control.Either;
 
 @Immutable
-abstract class Ad {
+public abstract class Ad {
 
     @Default
-    Map<String, String> additionalDetails() {
+    public Map<String, String> additionalDetails() {
         return HashMap.empty();
     }
 
     @Default
-    Category category() {
+    public Category category() {
         return Category.of(0, "All");
     }
 
     @Default
-    String description() {
+    public String description() {
         return "";
     }
 
     @Default
-    String headline() {
+    public String headline() {
         return "";
     }
 
-    abstract long id();
+    public abstract long id();
 
     @Default
-    List<String> images() {
+    public List<String> images() {
         return List.empty();
     }
 
-    final URL link(Configuration configuration) {
+    public final URL link(Configuration configuration) {
         return configuration.resolvePath("s-anzeige/" + id()).get();
     }
 
     @Default
-    String location() {
+    public String location() {
         return "";
     }
 
     @Default
-    String price() {
+    public String price() {
         return "";
     }
 
-    final String searchString() {
+    public final String searchString() {
         return headline().toLowerCase() + " " + description().toLowerCase();
     }
 
     @Default
-    Either<String, LocalDateTime> time() {
+    public Either<String, LocalDateTime> time() {
         return Either.left("no time set");
     }
 
     @Default
-    String vendorId() {
+    public String vendorId() {
         return "";
     }
 
     @Default
-    String vendorName() {
+    public String vendorName() {
         return "";
     }
 }
