@@ -60,7 +60,7 @@ public abstract class Configuration {
         }
     }
 
-    abstract URL baseUrl();
+    public abstract URL baseUrl();
 
     @Lazy
     public Try<List<Category>> categories() {
@@ -122,7 +122,7 @@ public abstract class Configuration {
         return pageDocument(category, pageNumber, Option.of(searchString));
     }
 
-    abstract int pageLimit();
+    public abstract int pageLimit();
 
     private final Try<URL> pageUrl(Category category, int pageNumber, Option<String> searchString) {
         StringBuilder path = new StringBuilder();
