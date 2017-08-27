@@ -134,17 +134,16 @@ public abstract class Configuration {
 
     public final Try<URL> pageUrl(int pageNumber, Option<String> searchString, Option<Category> category) {
         StringBuilder path = new StringBuilder();
-        String add = "";
+        path.append("/s-");
         if (pageNumber > 1) {
             if (pageNumber > pageLimit()) {
                 pageNumber = pageLimit();
             }
-            add += "seite:" + Integer.toString(pageNumber) + "/";
+            path.append("seite:" + Integer.toString(pageNumber) + "/");
         }
-        if (!searchString.getOrElse("").isEmpty()) {
-            add += searchString + "/";
+        if (!searchString.getOrElse("").trim().isEmpty()) {
+            path.append(searchString.get().trim() + "/k0");
         }
-        path.append(add);
         if (!category.isEmpty() && category.get().id() != 0) {
             path.append("c").append(category.get().id());
         }
