@@ -4,6 +4,19 @@ version = '1.0'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'com.github.saschawiegleb'
+            artifactId 'ek-api'
+            version '1.0-SNAPSHOT'
+
+            from components.java
+        }
+    }
+}
 
 buildscript {
     repositories {
