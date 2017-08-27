@@ -65,7 +65,7 @@ public abstract class Configuration {
     @Lazy
     public Try<List<Category>> categories() {
         return categoriesDocument().map(doc -> {
-            List<Category> cats = List.empty();
+            List<Category> cats = List.of(Category.none());
 
             for (Element element : doc.select(".a-span-8 a")) {
                 String cat[] = element.attr("href").split("/");
