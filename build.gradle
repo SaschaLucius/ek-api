@@ -37,7 +37,6 @@ jar {
 
 ext.versions = [
         assertj: "3.8.+",
-        guava: "21.+",
         immutables: "2.5.+",
         jsoup: "1.10.+",
         javaslang: "2.0.+",
@@ -51,7 +50,6 @@ repositories {
 dependencies {
     apt group: "org.immutables", name: "value", version: versions.immutables
     compileOnly group: "org.immutables", name: "value", version: versions.immutables, classifier: 'annotations'
-    compile group: "com.google.guava", name: "guava", version: versions.guava
     compile group: "io.javaslang", name: "javaslang", version: versions.javaslang
     compile group: "org.jsoup", name: "jsoup", version: versions.jsoup
     testCompile group: "org.assertj", name: "assertj-core", version: versions.assertj
