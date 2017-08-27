@@ -24,7 +24,11 @@ abstract class Configuration {
         101, 47
     });
 
-    private static final String categoriesPath = new String(new byte[] { 115, 45, 107, 97, 116, 101, 103, 111, 114, 105, 101, 110, 46, 104, 116, 109, 108 });
+    private static final String categoriesPath = new String(new byte[] {
+        115, 45, 107, 97, 116, 101, 103, 111,
+        114, 105, 101, 110, 46, 104, 116, 109,
+        108
+    });
 
     private static final int pageLimit = 50;
 
