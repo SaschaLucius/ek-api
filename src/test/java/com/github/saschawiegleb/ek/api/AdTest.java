@@ -19,7 +19,7 @@ public class AdTest implements DefaultConfiguration {
     @Test
     public void testAdById() {
         Category category = defaultConfiguration.category(245).get();
-        Document document = defaultConfiguration.pageDocument(category, 1).get();
+        Document document = defaultConfiguration.categoryDocument(category, 1).get();
         Map<Long, Either<String, LocalDateTime>> listOfElements = Parser.of(defaultConfiguration).parseAdEntries(document);
         Tuple2<Long, Either<String, LocalDateTime>> entry = listOfElements.head();
         Ad ad = Parser.of(defaultConfiguration).readAd(entry._1, entry._2);
@@ -30,7 +30,7 @@ public class AdTest implements DefaultConfiguration {
     @Test
     public void testAdByIdAdditionalDetails() {
         Category category = defaultConfiguration.category(216).get();
-        Document document = defaultConfiguration.pageDocument(category, 1).get();
+        Document document = defaultConfiguration.categoryDocument(category, 1).get();
         Map<Long, Either<String, LocalDateTime>> listOfElements = Parser.of(defaultConfiguration).parseAdEntries(document);
         Tuple2<Long, Either<String, LocalDateTime>> entry = listOfElements.head();
         Ad ad = Parser.of(defaultConfiguration).readAd(entry._1, entry._2);

@@ -3,10 +3,10 @@ package com.github.saschawiegleb.ek.api;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Parameter;
 
-@Immutable
+@Immutable(builder = false)
 public abstract class Category {
 
-    static Category of(int id, String name) {
+    public static Category of(int id, String name) {
         return ImmutableCategory.of(id, name);
     }
 

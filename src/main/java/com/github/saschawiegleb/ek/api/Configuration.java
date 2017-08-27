@@ -102,29 +102,37 @@ public abstract class Configuration {
 
     abstract URL categoriesUrl();
 
-    final Try<Category> category(int id) {
+    public final Try<Category> category(int id) {
         return categories().map(cs -> cs.find(c -> c.id() == id).get());
+    }
+
+    public final Try<Document> categoryDocument(Category category, int pageNumber) {
+        return categoryDocument(category, pageNumber, Option.none());
+    }
+
+    public final Try<Document> categoryDocument(Category category, int pageNumber, Option<String> searchString) {
+        return pageUrl(pageNumber, searchString, Option.of(category)).flatMap(url -> Reader.requestDocument(url));
+    }
+
+    public final Try<Document> categoryDocument(Category category, int pageNumber, String searchString) {
+        return categoryDocument(category, pageNumber, Option.of(searchString));
+    }
+
+    public final Try<URL> categoryUrl(Category category, int pageNumber) {
+        return pageUrl(pageNumber, Option.none(), Option.of(category));
+    }
+
+    public final Try<URL> categoryUrl(Category category, int pageNumber, String searchString) {
+        return pageUrl(pageNumber, Option.of(searchString), Option.of(category));
     }
 
     public final Try<URL> globalSearchUrl(String search, int page) {
         return resolvePath("/s-seite:" + page + "/" + search + "/k0");
     }
 
-    public final Try<Document> pageDocument(Category category, int pageNumber) {
-        return pageDocument(category, pageNumber, Option.none());
-    }
-
-    public final Try<Document> pageDocument(Category category, int pageNumber, Option<String> searchString) {
-        return pageUrl(category, pageNumber, searchString).flatMap(url -> Reader.requestDocument(url));
-    }
-
-    public final Try<Document> pageDocument(Category category, int pageNumber, String searchString) {
-        return pageDocument(category, pageNumber, Option.of(searchString));
-    }
-
     public abstract int pageLimit();
 
-    private final Try<URL> pageUrl(Category category, int pageNumber, Option<String> searchString) {
+    public final Try<URL> pageUrl(int pageNumber, Option<String> searchString, Option<Category> category) {
         StringBuilder path = new StringBuilder();
         String add = "";
         if (pageNumber > 1) {
@@ -136,7 +144,10 @@ public abstract class Configuration {
         if (!searchString.getOrElse("").isEmpty()) {
             add += searchString + "/";
         }
-        path.append(add).append("c").append(category.id());
+        path.append(add);
+        if (!category.isEmpty() && category.get().id() != 0) {
+            path.append("c").append(category.get().id());
+        }
         return resolvePath(path.toString());
     }
 
