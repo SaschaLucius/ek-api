@@ -4,6 +4,8 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Objects;
 
 import org.jsoup.nodes.Document;
@@ -20,8 +22,9 @@ import javaslang.control.Either;
 
 public final class Parser {
 
+    private static final DateTimeFormatter dayMonthYearFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", new Locale("de"));
     private static final Element defaultElement = new Element("DEFAULT");
-    private static Elements defaultElements = new Elements();
+    private static final Elements defaultElements = new Elements();
 
     static Parser of(Configuration configuration) {
         return new Parser(configuration);
@@ -238,7 +241,7 @@ public final class Parser {
                 LocalTime t = LocalTime.parse(time.tail().head().trim());
                 dateTime = t.atDate(LocalDate.now().minusDays(1));
             } else {
-                dateTime = LocalDate.parse(time.head().trim()).atStartOfDay();
+                dateTime = LocalDate.parse(time.head().trim(), dayMonthYearFormatter).atStartOfDay();
             }
             return Either.right(dateTime);
         } catch (RuntimeException e) {
