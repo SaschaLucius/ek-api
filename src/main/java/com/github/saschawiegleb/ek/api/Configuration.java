@@ -44,7 +44,7 @@ public abstract class Configuration {
         }
     }
 
-    static Configuration of(URL base, int pagelimit) {
+    public static Configuration of(URL base, int pagelimit) {
         return ImmutableConfiguration.builder()
             .baseUrl(base)
             .categoriesUrl(resolvePath(base, categoriesPath))
