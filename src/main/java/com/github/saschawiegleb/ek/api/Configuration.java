@@ -150,6 +150,11 @@ public abstract class Configuration {
         return resolvePath(path.toString());
     }
 
+    @Lazy
+    public Parser parse() {
+        return Parser.of(this);
+    }
+
     public final Try<URL> resolvePath(String path) {
         return Try.of(() -> new URL(baseUrl(), path));
     }

@@ -18,16 +18,10 @@ import javaslang.collection.Map;
 import javaslang.collection.Seq;
 import javaslang.control.Either;
 
-final class Parser {
+public final class Parser {
 
     private static final Element defaultElement = new Element("DEFAULT");
     private static Elements defaultElements = new Elements();
-
-    private final Configuration configuration;
-
-    private Parser(Configuration configuration) {
-        this.configuration = Objects.requireNonNull(configuration);
-    }
 
     static Parser of(Configuration configuration) {
         return new Parser(configuration);
@@ -51,8 +45,14 @@ final class Parser {
         return defaultElement;
     }
 
-    Seq<Ad> ads(Document adList) {
-        Map<Long, Either<String, LocalDateTime>> elementsById = parseAdEntries(adList);
+    private final Configuration configuration;
+
+    private Parser(Configuration configuration) {
+        this.configuration = Objects.requireNonNull(configuration);
+    }
+
+    public Seq<Ad> ads(Document ads) {
+        Map<Long, Either<String, LocalDateTime>> elementsById = parseAdEntries(ads);
         return elementsById.map(entry -> readAd(entry._1, entry._2));
     }
 
