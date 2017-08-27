@@ -41,9 +41,8 @@ abstract class Ad {
         return List.empty();
     }
 
-    final URL link() {
-        // TODO side effect, must be removed
-        return Configuration.defaults().resolvePath("s-anzeige/" + id()).get();
+    final URL link(Configuration configuration) {
+        return configuration.resolvePath("s-anzeige/" + id()).get();
     }
 
     @Default
