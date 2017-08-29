@@ -56,6 +56,11 @@ abstract class Selector {
     }
 
     @Default
+    String adPageAttributes() {
+        return ".attributelist-striped";
+    }
+
+    @Default
     String adPageCategory() {
         return "#vap-brdcrmb > a:nth-last-child(1)";
     }

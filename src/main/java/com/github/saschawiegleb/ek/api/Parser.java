@@ -118,14 +118,17 @@ public final class Parser {
                 return builder.build();
             }
 
-            setCategory(builder, adPage);
-            setHeadline(builder, adPage);
-            setPrice(builder, adPage);
-            setImages(builder, adPage);
-            setDescription(builder, adPage);
-            setVendor(builder, adPage);
-            setLocation(builder, adPage);
             setAdditionalDetails(builder, adPage);
+            setCategory(builder, adPage);
+            setDescription(builder, adPage);
+            setHeadline(builder, adPage);
+            setImages(builder, adPage);
+            setLocation(builder, adPage);
+            setPrice(builder, adPage);
+            if (time.isLeft()) {
+                setTime(builder, adPage);
+            }
+            setVendor(builder, adPage);
             return builder.build();
         } catch (Exception e) {
             logger.log(Level.WARNING, e.getMessage(), e);
@@ -225,6 +228,23 @@ public final class Parser {
         }
 
         builder.price("unknown");
+    }
+
+    private void setTime(Builder builder, Document adPage) {
+        try {
+            Elements children = adPage.select(configuration.selector().adPageAttributes()).first().children();
+            String time = List.ofAll(children)
+                .splitAt(element -> element.ownText().contains("Erstellungsdatum"))
+                ._2()
+                .tail()
+                .head()
+                .ownText()
+                .trim();
+            LocalDateTime dateTime = LocalDate.parse(time, dayMonthYearFormatter).atStartOfDay();
+            builder.time(Either.right(dateTime));
+        } catch (Exception e) {
+            builder.time(Either.left(e.getMessage()));
+        }
     }
 
     private void setVendor(Builder builder, Document adPage) {
