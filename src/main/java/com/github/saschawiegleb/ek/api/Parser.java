@@ -19,6 +19,7 @@ import javaslang.collection.List;
 import javaslang.collection.Map;
 import javaslang.collection.Seq;
 import javaslang.control.Either;
+import javaslang.control.Option;
 
 public final class Parser {
 
@@ -72,6 +73,21 @@ public final class Parser {
             return configuration.resolvePath(id).get();
         }
         return configuration.resolvePath("s-bestandsliste.html?userId=" + id).get();
+    }
+
+    public Option<URL> nextPage(Document document) {
+        Elements pages = document.select(".pagination-pages").first().children();
+        List<Element> followingPages = List
+            .ofAll(pages)
+            .splitAt(element -> element.hasClass("pagination-current"))
+            ._2()
+            .tail();
+        if (followingPages.isEmpty()) {
+            return Option.none();
+        }
+        String path = followingPages.head().attr("href");
+        URL url = configuration.resolvePath(path).get();
+        return Option.of(url);
     }
 
     Map<Long, Either<String, LocalDateTime>> parseAdEntries(Document adList) {
@@ -226,7 +242,6 @@ public final class Parser {
             builder.vendorName(user.ownText().trim());
             return;
         }
-        System.out.println(adPage.baseUri());
     }
 
     private Either<String, LocalDateTime> time(Element adListEntry) {
