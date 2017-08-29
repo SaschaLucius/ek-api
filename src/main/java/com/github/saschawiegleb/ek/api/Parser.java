@@ -7,6 +7,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -22,6 +24,7 @@ import javaslang.control.Either;
 import javaslang.control.Option;
 
 public final class Parser {
+    private static Logger logger = Logger.getLogger(Parser.class.getName());
 
     private static final DateTimeFormatter dayMonthYearFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", new Locale("de"));
     private static final Element defaultElement = new Element("DEFAULT");
@@ -105,21 +108,27 @@ public final class Parser {
         builder.id(id);
         builder.time(time);
         // TODO side effect, must be removed
-        Document adPage = Reader.requestDocument(linkById(id)).get();
-        if (!isAvailable(adPage)) {
-            builder.headline("no longer available");
+        try {
+            Document adPage = Reader.requestDocument(linkById(id)).get();
+            if (!isAvailable(adPage)) {
+                builder.headline("no longer available");
+                return builder.build();
+            }
+
+            setCategory(builder, adPage);
+            setHeadline(builder, adPage);
+            setPrice(builder, adPage);
+            setImages(builder, adPage);
+            setDescription(builder, adPage);
+            setVendor(builder, adPage);
+            setLocation(builder, adPage);
+            setAdditionalDetails(builder, adPage);
+            return builder.build();
+        } catch (Exception e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+            builder.headline("Error fetching ad page: " + e.getMessage());
             return builder.build();
         }
-
-        setCategory(builder, adPage);
-        setHeadline(builder, adPage);
-        setPrice(builder, adPage);
-        setImages(builder, adPage);
-        setDescription(builder, adPage);
-        setVendor(builder, adPage);
-        setLocation(builder, adPage);
-        setAdditionalDetails(builder, adPage);
-        return builder.build();
     }
 
     Ad readAdSmall(long id, Either<String, LocalDateTime> time, Element adListEntry) {
@@ -227,9 +236,14 @@ public final class Parser {
             String id = userPageLink.attr(configuration.selector().adPageVendorLinkAttribute()).replaceAll("/s-bestandsliste\\.html\\?userId=", "");
             builder.vendorId(id);
             // TODO side effect, must be removed
-            Document userPage = Reader.requestDocument(linkByUserId(id)).get();
-            Element user = selectFirst(userPage, configuration.selector().userPageUsername());
-            builder.vendorName(user.ownText());
+            try {
+                Document userPage = Reader.requestDocument(linkByUserId(id)).get();
+                Element user = selectFirst(userPage, configuration.selector().userPageUsername());
+                builder.vendorName(user.ownText());
+            } catch (Exception e) {
+                logger.log(Level.WARNING, e.getMessage(), e);
+                builder.vendorName(String.format("Error fetching vendor page", e.getMessage()));
+            }
             return;
         }
         userPageLink = selectFirst(adPage, configuration.selector().adPageVendorShopOtherAds());
@@ -237,9 +251,14 @@ public final class Parser {
             String id = userPageLink.attr(configuration.selector().adPageVendorLinkAttribute()).replaceAll("/s-bestandsliste\\.html\\?userId=", "");
             builder.vendorId(id);
             // TODO side effect, must be removed
-            Document userPage = Reader.requestDocument(linkByUserId(id)).get();
-            Element user = selectFirst(userPage, configuration.selector().userPageShopName());
-            builder.vendorName(user.ownText().trim());
+            try {
+                Document userPage = Reader.requestDocument(linkByUserId(id)).get();
+                Element user = selectFirst(userPage, configuration.selector().userPageShopName());
+                builder.vendorName(user.ownText().trim());
+            } catch (Exception e) {
+                logger.log(Level.WARNING, e.getMessage(), e);
+                builder.vendorName(String.format("Error fetching vendor page", e.getMessage()));
+            }
             return;
         }
     }
