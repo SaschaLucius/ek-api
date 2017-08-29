@@ -72,6 +72,9 @@ public final class Parser {
     }
 
     private URL linkByUserId(String id) {
+        if (id.startsWith("/pro/")) {
+            return configuration.resolvePath(id).get();
+        }
         if (id.contains("shop")) {
             return configuration.resolvePath(id).get();
         }
