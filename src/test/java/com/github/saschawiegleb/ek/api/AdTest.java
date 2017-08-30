@@ -2,7 +2,7 @@ package com.github.saschawiegleb.ek.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -20,8 +20,8 @@ public class AdTest implements DefaultConfiguration {
     public void testAdById() {
         Category category = defaultConfiguration.category(245).get();
         Document document = defaultConfiguration.categoryDocument(category, 1).get();
-        Map<Long, Either<String, LocalDateTime>> listOfElements = Parser.of(defaultConfiguration).parseAdEntries(document);
-        Tuple2<Long, Either<String, LocalDateTime>> entry = listOfElements.head();
+        Map<Long, Either<String, ZonedDateTime>> listOfElements = Parser.of(defaultConfiguration).parseAdEntries(document);
+        Tuple2<Long, Either<String, ZonedDateTime>> entry = listOfElements.head();
         Ad ad = Parser.of(defaultConfiguration).readAd(entry._1, entry._2);
         System.err.println(ad);
         // TODO test
@@ -31,8 +31,8 @@ public class AdTest implements DefaultConfiguration {
     public void testAdByIdAdditionalDetails() {
         Category category = defaultConfiguration.category(216).get();
         Document document = defaultConfiguration.categoryDocument(category, 1).get();
-        Map<Long, Either<String, LocalDateTime>> listOfElements = Parser.of(defaultConfiguration).parseAdEntries(document);
-        Tuple2<Long, Either<String, LocalDateTime>> entry = listOfElements.head();
+        Map<Long, Either<String, ZonedDateTime>> listOfElements = Parser.of(defaultConfiguration).parseAdEntries(document);
+        Tuple2<Long, Either<String, ZonedDateTime>> entry = listOfElements.head();
         Ad ad = Parser.of(defaultConfiguration).readAd(entry._1, entry._2);
         System.err.println(ad);
         // TODO test

@@ -4,6 +4,8 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
@@ -24,11 +26,12 @@ import javaslang.control.Either;
 import javaslang.control.Option;
 
 public final class Parser {
-    private static Logger logger = Logger.getLogger(Parser.class.getName());
 
+    private static final ZoneId berlin = ZoneId.of("Europe/Berlin");
     private static final DateTimeFormatter dayMonthYearFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", new Locale("de"));
     private static final Element defaultElement = new Element("DEFAULT");
     private static final Elements defaultElements = new Elements();
+    private static final Logger logger = Logger.getLogger(Parser.class.getName());
 
     static Parser of(Configuration configuration) {
         return new Parser(configuration);
@@ -59,7 +62,7 @@ public final class Parser {
     }
 
     public Seq<Ad> ads(Document ads) {
-        Map<Long, Either<String, LocalDateTime>> elementsById = parseAdEntries(ads);
+        Map<Long, Either<String, ZonedDateTime>> elementsById = parseAdEntries(ads);
         return elementsById.map(entry -> readAd(entry._1, entry._2));
     }
 
@@ -96,17 +99,17 @@ public final class Parser {
         return Option.of(url);
     }
 
-    Map<Long, Either<String, LocalDateTime>> parseAdEntries(Document adList) {
-        Map<Long, Either<String, LocalDateTime>> map = HashMap.empty();
+    Map<Long, Either<String, ZonedDateTime>> parseAdEntries(Document adList) {
+        Map<Long, Either<String, ZonedDateTime>> map = HashMap.empty();
         for (Element adListEntry : adList.select(configuration.selector().adListEntryElement())) {
             long id = Long.parseLong(adListEntry.attr(configuration.selector().adListEntryId()));
-            Either<String, LocalDateTime> time = time(adListEntry);
+            Either<String, ZonedDateTime> time = time(adListEntry);
             map = map.put(id, time);
         }
         return map;
     }
 
-    Ad readAd(long id, Either<String, LocalDateTime> time) {
+    Ad readAd(long id, Either<String, ZonedDateTime> time) {
         ImmutableAd.Builder builder = ImmutableAd.builder();
         builder.id(id);
         builder.time(time);
@@ -137,7 +140,7 @@ public final class Parser {
         }
     }
 
-    Ad readAdSmall(long id, Either<String, LocalDateTime> time, Element adListEntry) {
+    Ad readAdSmall(long id, Either<String, ZonedDateTime> time, Element adListEntry) {
         ImmutableAd.Builder builder = ImmutableAd.builder();
         builder.id(id);
         builder.time(time);
@@ -241,7 +244,7 @@ public final class Parser {
                 .ownText()
                 .trim();
             LocalDateTime dateTime = LocalDate.parse(time, dayMonthYearFormatter).atStartOfDay();
-            builder.time(Either.right(dateTime));
+            builder.time(Either.right(ZonedDateTime.of(dateTime, berlin)));
         } catch (Exception e) {
             builder.time(Either.left(e.getMessage()));
         }
@@ -286,7 +289,7 @@ public final class Parser {
         }
     }
 
-    private Either<String, LocalDateTime> time(Element adListEntry) {
+    private Either<String, ZonedDateTime> time(Element adListEntry) {
         try {
             // not available in TopAds
             List<String> time = List.of(adListEntry.select(configuration.selector().adListEntryTime()).first().ownText().split(","));
@@ -300,7 +303,7 @@ public final class Parser {
             } else {
                 dateTime = LocalDate.parse(time.head().trim(), dayMonthYearFormatter).atStartOfDay();
             }
-            return Either.right(dateTime);
+            return Either.right(ZonedDateTime.of(dateTime, berlin));
         } catch (RuntimeException e) {
             return Either.left(e.getMessage());
         }

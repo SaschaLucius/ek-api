@@ -1,7 +1,7 @@
 package com.github.saschawiegleb.ek.api;
 
 import java.net.URL;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
@@ -60,7 +60,7 @@ public abstract class Ad {
     }
 
     @Default
-    public Either<String, LocalDateTime> time() {
+    public Either<String, ZonedDateTime> time() {
         return Either.left("no time set");
     }
 
