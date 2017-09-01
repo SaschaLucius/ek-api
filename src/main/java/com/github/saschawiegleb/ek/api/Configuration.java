@@ -65,34 +65,27 @@ public abstract class Configuration {
     @Lazy
     public Try<List<Category>> categories() {
         return categoriesDocument().map(doc -> {
-            List<Category> cats = List.of(Category.none());
+            List<Category> categories = List.of(Category.none());
 
             for (Element element : doc.select(".a-span-8 a")) {
                 String cat[] = element.attr("href").split("/");
-                String key = cat[cat.length - 1].substring(1);
-                String value1 = cat[1].substring(2);
-                String value2 = element.ownText();
+                String id = cat[cat.length - 1].substring(1);
+                String key = cat[1].substring(2);
+                String value = element.ownText();
 
-                String test = value2.replaceAll(", ", "-");
-                test = test.replaceAll(" & ", "-");
-                test = test.replaceAll("ö", "oe");
-                test = test.replaceAll("Ö", "Oe");
-                test = test.replaceAll("ä", "ae");
-                test = test.replaceAll("Ä", "Ae");
-                test = test.replaceAll("ü", "ue");
-                test = test.replaceAll("Ü", "Ue");
-                test = test.replaceAll("--", "-");
-                test = test.replaceAll("--", "-");
-                test = test.replaceAll("  ", " ");
-                test = test.replaceAll("  ", " ");
-                test = test.replaceAll(" ", "-");
-
-                if (!value1.equalsIgnoreCase(test) && !test.toLowerCase().contains(value1)) {
-                    value2 = value1 + ": " + value2;
+                List<String> keyComponents = List.of(key.split("-"));
+                keyComponents = keyComponents.map(item -> item.substring(0, 1).toUpperCase() + item.substring(1));
+                if (value.equalsIgnoreCase("weiteres") || value.equalsIgnoreCase("weitere")) {
+                    StringBuilder builder = new StringBuilder();
+                    for (String a : keyComponents) {
+                        builder.append(a).append(" ");
+                    }
+                    value = builder.toString() + ": " + value;
                 }
-                cats = cats.append(Category.of(Integer.valueOf(key), value2));
+                categories = categories.append(Category.of(Integer.valueOf(id), value));
             }
-            return cats;
+
+            return categories;
         });
     }
 
