@@ -2,6 +2,10 @@ package com.github.saschawiegleb.ek.api;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
@@ -15,6 +19,7 @@ import javaslang.control.Try;
 
 @Immutable
 public abstract class Configuration {
+    private static final Logger logger = Logger.getLogger(Configuration.class.getName());
 
     private static final String baseUrl = new String(new byte[] {
         104, 116, 116, 112, 115, 58, 47, 47,
@@ -40,6 +45,7 @@ public abstract class Configuration {
         try {
             return of(new URL(baseUrl), pagelimit);
         } catch (MalformedURLException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -56,8 +62,13 @@ public abstract class Configuration {
         try {
             return new URL(base, path);
         } catch (MalformedURLException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
             throw new RuntimeException(e);
         }
+    }
+
+    public static void setGlobalLogLevel(Level logLevel) {
+        Arrays.stream(LogManager.getLogManager().getLogger("").getHandlers()).forEach(h -> h.setLevel(logLevel));
     }
 
     public abstract URL baseUrl();
@@ -99,6 +110,10 @@ public abstract class Configuration {
         return categories().map(cs -> cs.find(c -> c.id() == id).get());
     }
 
+    public final Try<Category> category(String name) {
+        return categories().map(cs -> cs.find(c -> c.name().contains(name)).get());
+    }
+
     public final Try<Document> categoryDocument(Category category, int pageNumber) {
         return categoryDocument(category, pageNumber, Option.none());
     }
@@ -126,6 +141,9 @@ public abstract class Configuration {
     public abstract int pageLimit();
 
     public final Try<URL> pageUrl(int pageNumber, Option<String> searchString, Option<Category> category) {
+        if (pageNumber > pageLimit) {
+            logger.info(String.format("The requested pageNumber %d is larger than the pageLimit %d. The last possible page will been used.", pageNumber, pageLimit));
+        }
         StringBuilder path = new StringBuilder();
         path.append("/s-");
         if (pageNumber > 1) {
@@ -137,7 +155,7 @@ public abstract class Configuration {
         if (!searchString.getOrElse("").trim().isEmpty()) {
             path.append(searchString.get().trim() + "/k0");
         }
-        if (!category.isEmpty() && category.get().id() != 0) {
+        if (!category.isEmpty()) {
             path.append("c").append(category.get().id());
         }
         return resolvePath(path.toString());

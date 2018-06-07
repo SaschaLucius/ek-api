@@ -18,6 +18,14 @@ public class ParserTest implements DefaultConfiguration {
     }
 
     @Test
+    public void ads_readAdLeightweight() {
+        Category category = defaultConfiguration.category(245).get();
+        Document document = defaultConfiguration.categoryDocument(category, 1).get();
+        Seq<Ad> ads = Parser.of(defaultConfiguration).adsLightweight(document);
+        assertThat(ads.size()).isGreaterThanOrEqualTo(25);
+    }
+
+    @Test
     public void ads_topPageDocument() {
         Category category = defaultConfiguration.category(245).get();
         Document document = defaultConfiguration.topPageDocument(category, 1).get();

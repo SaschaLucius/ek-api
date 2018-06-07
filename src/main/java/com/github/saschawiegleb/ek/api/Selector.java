@@ -46,6 +46,11 @@ abstract class Selector {
     }
 
     @Default
+    String adListImage() {
+        return "article > section.aditem-image > div";
+    }
+
+    @Default
     String adPageAdditionalDetailsKeys() {
         return "#viewad-details > section > dl dt";
     }

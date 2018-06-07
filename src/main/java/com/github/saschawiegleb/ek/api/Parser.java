@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -33,6 +34,12 @@ public final class Parser {
     private static final Elements defaultElements = new Elements();
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
 
+    private final Configuration configuration;
+
+    private Parser(Configuration configuration) {
+        this.configuration = Objects.requireNonNull(configuration);
+    }
+
     static Parser of(Configuration configuration) {
         return new Parser(configuration);
     }
@@ -55,15 +62,24 @@ public final class Parser {
         return defaultElement;
     }
 
-    private final Configuration configuration;
-
-    private Parser(Configuration configuration) {
-        this.configuration = Objects.requireNonNull(configuration);
-    }
-
     public Seq<Ad> ads(Document ads) {
         Map<Long, Either<String, ZonedDateTime>> elementsById = parseAdEntries(ads);
         return elementsById.map(entry -> readAd(entry._1, entry._2));
+    }
+
+    public Seq<Ad> ads(Document ads, long lowerBound) {
+        Map<Long, Either<String, ZonedDateTime>> elementsById = parseAdEntries(ads);
+        return elementsById.filter(e -> e._1 > lowerBound).map(entry -> readAd(entry._1, entry._2));
+    }
+
+    public Seq<Ad> adsLightweight(Document ads) {
+        ArrayList<Ad> adList = new ArrayList<>();
+        for (Element adListEntry : ads.select(configuration.selector().adListEntryElement())) {
+            long id = Long.parseLong(adListEntry.attr(configuration.selector().adListEntryId()));
+            Either<String, ZonedDateTime> time = time(adListEntry);
+            adList.add(readAdLightweight(id, time, adListEntry));
+        }
+        return List.ofAll(adList);
     }
 
     private boolean isAvailable(Document adPage) {
@@ -118,6 +134,7 @@ public final class Parser {
             Document adPage = Reader.requestDocument(linkById(id)).get();
             if (!isAvailable(adPage)) {
                 builder.headline("no longer available");
+                logger.info(String.format("Ad with id %d is no longer available.", id));
                 return builder.build();
             }
 
@@ -140,7 +157,7 @@ public final class Parser {
         }
     }
 
-    Ad readAdSmall(long id, Either<String, ZonedDateTime> time, Element adListEntry) {
+    Ad readAdLightweight(long id, Either<String, ZonedDateTime> time, Element adListEntry) {
         ImmutableAd.Builder builder = ImmutableAd.builder();
         builder.id(id);
         builder.time(time);
@@ -148,9 +165,10 @@ public final class Parser {
         builder.description(selectFirst(adListEntry, configuration.selector().adListEntryDescription()).ownText());
         builder.price(selectFirst(adListEntry, configuration.selector().adListEntryPrice()).ownText());
         builder.location(selectFirst(adListEntry, configuration.selector().adListEntryLocation()).ownText());
-        builder.time(time(adListEntry));
-        // String img = selectFirst(adListEntry, "article > section.aditem-image
-        // > div > img").attr("data-imgsrc");
+        builder.images(
+            List.of(selectFirst(adListEntry, configuration.selector().adListImage())
+                .attr("data-imgsrc")
+                .replaceFirst("_9", "_57")));
         return builder.build();
     }
 
@@ -217,7 +235,6 @@ public final class Parser {
             builder.price(price.ownText().replaceAll("Preis: ", ""));
             return;
         }
-
         String category = selectFirst(adPage, "#viewad-main > meta").attr("content");
         if (category.equals("Tauschen") || category.equals("Zu verschenken") || category.equals("Verleihen")) {
             builder.price(category);
@@ -246,6 +263,7 @@ public final class Parser {
             LocalDateTime dateTime = LocalDate.parse(time, dayMonthYearFormatter).atStartOfDay();
             builder.time(Either.right(ZonedDateTime.of(dateTime, berlin)));
         } catch (Exception e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
             builder.time(Either.left(e.getMessage()));
         }
     }
@@ -300,13 +318,15 @@ public final class Parser {
             } else if (time.head().equals("Gestern")) {
                 LocalTime t = LocalTime.parse(time.tail().head().trim());
                 dateTime = t.atDate(LocalDate.now().minusDays(1));
-            } else {
+            } else if (!time.head().trim().isEmpty()) {
                 dateTime = LocalDate.parse(time.head().trim(), dayMonthYearFormatter).atStartOfDay();
+            } else {
+                return Either.left("Ad has no time entry (maybe Top Ad)");
             }
             return Either.right(ZonedDateTime.of(dateTime, berlin));
         } catch (RuntimeException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
             return Either.left(e.getMessage());
         }
     }
-
 }
