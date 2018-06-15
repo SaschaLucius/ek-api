@@ -1,4 +1,4 @@
-package com.github.saschawiegleb.ek.api;
+package com.github.saschawiegleb.ek.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,6 +10,11 @@ import java.util.Random;
 import org.jsoup.nodes.Document;
 import org.junit.Test;
 
+import com.github.saschawiegleb.ek.DefaultConfiguration;
+import com.github.saschawiegleb.ek.entity.Ad;
+import com.github.saschawiegleb.ek.entity.Category;
+import com.github.saschawiegleb.ek.parser.Parser;
+
 import javaslang.Tuple2;
 import javaslang.collection.Map;
 import javaslang.control.Either;
@@ -18,6 +23,7 @@ public class AdTest implements DefaultConfiguration {
 
     @Test
     public void testAdByIdAdditionalDetails() {
+        // Cars
         Category category = defaultConfiguration.category(216).get();
         Document document = defaultConfiguration.categoryDocument(category, 1).get();
         Map<Long, Either<String, ZonedDateTime>> listOfElements = Parser.of(defaultConfiguration).parseAdEntries(document);
@@ -62,7 +68,7 @@ public class AdTest implements DefaultConfiguration {
         long y = latest.id();
         Random r = new Random();
 
-        for (int i = 0; i < 25; i++) {
+        for (int i = 0; i < 5; i++) {
             long number = x + (long) (r.nextDouble() * (y - x));
             Ad ad = Parser.of(defaultConfiguration).readAd(number, Either.left("no time set"));
             ads.add(ad);

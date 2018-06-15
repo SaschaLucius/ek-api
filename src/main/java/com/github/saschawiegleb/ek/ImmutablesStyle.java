@@ -1,4 +1,4 @@
-package com.github.saschawiegleb.ek.api;
+package com.github.saschawiegleb.ek;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -23,8 +23,8 @@ import org.immutables.value.Value.Style.ImplementationVisibility;
     instance = "singleton",
 
     /**
-     * Forces extension of abstract value type class in generated signatures instead
-     * of the immutable implementation class.
+     * Forces extension of abstract value type class in generated signatures
+     * instead of the immutable implementation class.
      */
     overshadowImplementation = true,
 
@@ -34,7 +34,7 @@ import org.immutables.value.Value.Style.ImplementationVisibility;
     /** Generated class will be always package-private */
     visibility = ImplementationVisibility.PACKAGE,
 
-    /** Setup defaults for Datameer's immutable types */
+    /** Setup defaults for immutable types */
     defaults = @Value.Immutable(builder = true, copy = true, intern = true, prehash = true, singleton = false)
 
 )

@@ -1,4 +1,4 @@
-package com.github.saschawiegleb.ek.api;
+package com.github.saschawiegleb.ek.network;
 
 import java.net.URL;
 import java.util.logging.Level;
@@ -11,7 +11,7 @@ import org.jsoup.nodes.Document;
 
 import javaslang.control.Try;
 
-final class Reader {
+public final class Reader {
     private static final Logger logger = Logger.getLogger(Reader.class.getName());
 
     private static Try<Response> request(URL url) {
@@ -39,7 +39,7 @@ final class Reader {
         }
     }
 
-    static Try<Document> requestDocument(URL url) {
+    public static Try<Document> requestDocument(URL url) {
         return request(url).mapTry(response -> response.parse());
     }
 }

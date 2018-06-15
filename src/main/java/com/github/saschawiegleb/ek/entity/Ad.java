@@ -1,4 +1,4 @@
-package com.github.saschawiegleb.ek.api;
+package com.github.saschawiegleb.ek.entity;
 
 import java.net.URL;
 import java.time.ZonedDateTime;

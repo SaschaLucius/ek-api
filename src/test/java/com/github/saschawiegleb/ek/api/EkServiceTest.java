@@ -6,6 +6,9 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.github.saschawiegleb.ek.entity.Ad;
+import com.github.saschawiegleb.ek.entity.Category;
+
 import javaslang.collection.List;
 
 public class EkServiceTest {
@@ -73,5 +76,4 @@ public class EkServiceTest {
         List<Ad> ads = service.getAds(category, 1, 25, 50);
         assertThat(ads.length()).isLessThanOrEqualTo(27 * 3).isGreaterThanOrEqualTo(25 * 3);
     }
-
 }

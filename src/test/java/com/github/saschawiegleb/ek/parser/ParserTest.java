@@ -1,9 +1,14 @@
-package com.github.saschawiegleb.ek.api;
+package com.github.saschawiegleb.ek.parser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.jsoup.nodes.Document;
 import org.junit.Test;
+
+import com.github.saschawiegleb.ek.DefaultConfiguration;
+import com.github.saschawiegleb.ek.entity.Ad;
+import com.github.saschawiegleb.ek.entity.Category;
+import com.github.saschawiegleb.ek.parser.Parser;
 
 import javaslang.collection.Seq;
 

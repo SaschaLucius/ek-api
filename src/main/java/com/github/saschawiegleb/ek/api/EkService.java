@@ -2,6 +2,11 @@ package com.github.saschawiegleb.ek.api;
 
 import org.jsoup.nodes.Document;
 
+import com.github.saschawiegleb.ek.entity.Ad;
+import com.github.saschawiegleb.ek.entity.Category;
+import com.github.saschawiegleb.ek.entity.Configuration;
+import com.github.saschawiegleb.ek.parser.Parser;
+
 import javaslang.collection.List;
 import javaslang.control.Either;
 

@@ -1,4 +1,4 @@
-package com.github.saschawiegleb.ek.api;
+package com.github.saschawiegleb.ek.network;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -8,6 +8,8 @@ import java.net.URL;
 import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
 import org.junit.Test;
+
+import com.github.saschawiegleb.ek.network.Reader;
 
 public class ReaderTest {
 

@@ -1,12 +1,12 @@
-package com.github.saschawiegleb.ek.api;
+package com.github.saschawiegleb.ek.parser;
 
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 
 @Immutable
-abstract class Selector {
+public abstract class Selector {
 
-    static Selector of() {
+    public static Selector of() {
         return ImmutableSelector.builder().build();
     }
 

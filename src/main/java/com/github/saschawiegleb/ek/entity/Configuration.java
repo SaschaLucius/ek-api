@@ -1,4 +1,4 @@
-package com.github.saschawiegleb.ek.api;
+package com.github.saschawiegleb.ek.entity;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,14 +13,16 @@ import org.immutables.value.Value.Lazy;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import com.github.saschawiegleb.ek.network.Reader;
+import com.github.saschawiegleb.ek.parser.Parser;
+import com.github.saschawiegleb.ek.parser.Selector;
+
 import javaslang.collection.List;
 import javaslang.control.Option;
 import javaslang.control.Try;
 
 @Immutable
 public abstract class Configuration {
-    private static final Logger logger = Logger.getLogger(Configuration.class.getName());
-
     private static final String baseUrl = new String(new byte[] {
         104, 116, 116, 112, 115, 58, 47, 47,
         119, 119, 119, 46, 101, 98, 97, 121,
@@ -34,6 +36,8 @@ public abstract class Configuration {
         114, 105, 101, 110, 46, 104, 116, 109,
         108
     });
+
+    private static final Logger logger = Logger.getLogger(Configuration.class.getName());
 
     private static final int pageLimit = 50;
 
@@ -58,7 +62,7 @@ public abstract class Configuration {
             .build();
     }
 
-    static URL resolvePath(URL base, String path) {
+    private static URL resolvePath(URL base, String path) {
         try {
             return new URL(base, path);
         } catch (MalformedURLException e) {
@@ -171,7 +175,7 @@ public abstract class Configuration {
     }
 
     @Default
-    Selector selector() {
+    public Selector selector() {
         return Selector.of();
     }
 
