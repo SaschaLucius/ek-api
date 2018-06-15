@@ -1,4 +1,4 @@
-package com.github.saschawiegleb.ek.api;
+package com.github.saschawiegleb.ek.entity;
 
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Parameter;

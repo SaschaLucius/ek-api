@@ -1,4 +1,4 @@
-package com.github.saschawiegleb.ek.api;
+package com.github.saschawiegleb.ek.parser;
 
 import java.net.URL;
 import java.time.LocalDate;
@@ -17,7 +17,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.github.saschawiegleb.ek.api.ImmutableAd.Builder;
+import com.github.saschawiegleb.ek.entity.Ad;
+import com.github.saschawiegleb.ek.entity.Configuration;
+import com.github.saschawiegleb.ek.entity.ImmutableAd;
+import com.github.saschawiegleb.ek.entity.ImmutableAd.Builder;
+import com.github.saschawiegleb.ek.network.Reader;
 
 import javaslang.collection.HashMap;
 import javaslang.collection.List;
@@ -27,7 +31,6 @@ import javaslang.control.Either;
 import javaslang.control.Option;
 
 public final class Parser {
-
     private static final ZoneId berlin = ZoneId.of("Europe/Berlin");
     private static final DateTimeFormatter dayMonthYearFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", new Locale("de"));
     private static final Element defaultElement = new Element("DEFAULT");
@@ -40,7 +43,7 @@ public final class Parser {
         this.configuration = Objects.requireNonNull(configuration);
     }
 
-    static Parser of(Configuration configuration) {
+    public static Parser of(Configuration configuration) {
         return new Parser(configuration);
     }
 
@@ -115,7 +118,7 @@ public final class Parser {
         return Option.of(url);
     }
 
-    Map<Long, Either<String, ZonedDateTime>> parseAdEntries(Document adList) {
+    public Map<Long, Either<String, ZonedDateTime>> parseAdEntries(Document adList) {
         Map<Long, Either<String, ZonedDateTime>> map = HashMap.empty();
         for (Element adListEntry : adList.select(configuration.selector().adListEntryElement())) {
             long id = Long.parseLong(adListEntry.attr(configuration.selector().adListEntryId()));
@@ -125,7 +128,7 @@ public final class Parser {
         return map;
     }
 
-    Ad readAd(long id, Either<String, ZonedDateTime> time) {
+    public Ad readAd(long id, Either<String, ZonedDateTime> time) {
         ImmutableAd.Builder builder = ImmutableAd.builder();
         builder.id(id);
         builder.time(time);
