@@ -65,7 +65,7 @@ public class EkService {
         return defaultConfiguration.category(name).get();
     }
 
-    public List<Category> getCategorys() {
+    public List<Category> getCategories() {
         return defaultConfiguration.categories().get();
     }
 
