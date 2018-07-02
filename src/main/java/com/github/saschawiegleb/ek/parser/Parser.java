@@ -171,7 +171,7 @@ public final class Parser {
         builder.images(
             List.of(selectFirst(adListEntry, configuration.selector().adListImage())
                 .attr("data-imgsrc")
-                .replaceFirst("_9", "_57")));
+                .replaceFirst("_9", "_3")));
         return builder.build();
     }
 
@@ -221,7 +221,7 @@ public final class Parser {
             Elements images = selectAll(adPage, configuration.selector().adPageImages());
             List<String> imageLinks = List.empty();
             for (Element img : images) {
-                String link = img.attr(configuration.selector().adPageImagesLinkAttribute()).replaceFirst("_72", "_57");
+                String link = img.attr(configuration.selector().adPageImagesLinkAttribute()).replaceFirst("_72", "_3");
                 imageLinks = imageLinks.append(link);
             }
             builder.images(imageLinks);
