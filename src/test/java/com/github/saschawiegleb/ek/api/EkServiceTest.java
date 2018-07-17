@@ -24,7 +24,7 @@ public class EkServiceTest {
     public void testGetAllAds() {
         Category category = service.getCategory(245);
         List<Ad> ads = service.getAds(category);
-        assertThat(ads.length()).isEqualTo(27 * 50);
+        assertThat(ads.length()).isGreaterThan(25 * 50);
     }
 
     @Ignore
@@ -37,8 +37,8 @@ public class EkServiceTest {
     @Test
     public void testGetInvalidPageAds() {
         Category category = service.getCategory(245);
-        List<Ad> ads = service.getAds(category, 51);
-        assertThat(ads.length()).isEqualTo(0);
+        List<Ad> ads = service.getAds(category, 51); // will return page 50
+        assertThat(ads.length()).isEqualTo(27);
     }
 
     // @Test
@@ -75,5 +75,19 @@ public class EkServiceTest {
         Category category = service.getCategory(245);
         List<Ad> ads = service.getAds(category, 1, 25, 50);
         assertThat(ads.length()).isLessThanOrEqualTo(27 * 3).isGreaterThanOrEqualTo(25 * 3);
+    }
+
+    @Test
+    public void testLimit() {
+        Category category = service.getCategory(245);
+        List<Ad> ads = service.getLatestAds(category, Integer.MAX_VALUE);
+        assertThat(ads.length()).isEqualTo(0);
+    }
+
+    @Test
+    public void testNoLimit() {
+        Category category = service.getCategory(245);
+        List<Ad> ads = service.getLatestAds(category, 0);
+        assertThat(ads.length()).isEqualTo(27);
     }
 }

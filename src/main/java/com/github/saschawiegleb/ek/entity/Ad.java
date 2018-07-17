@@ -3,6 +3,7 @@ package com.github.saschawiegleb.ek.entity;
 import java.net.URL;
 import java.time.ZonedDateTime;
 
+import org.immutables.gson.Gson.TypeAdapters;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 
@@ -12,6 +13,7 @@ import javaslang.collection.Map;
 import javaslang.control.Either;
 
 @Immutable
+@TypeAdapters
 public abstract class Ad {
 
     @Default
