@@ -5,6 +5,7 @@ It provides easy access to functionalities like:
 * reading ads
 * listing ads
 * searching for ads
+No eBay partner account is required, because it does not use the Classifieds API.
 
 ## Useful Gradle Tasks
 
